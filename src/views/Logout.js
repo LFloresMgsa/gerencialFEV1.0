@@ -28,13 +28,15 @@ const Logout = () => {
 
     cookies.remove('Sgm_cUsuario', { path: "/" });
     cookies.remove('Sgm_cRole', { path: "/" });
-    //cookies.remove('Sgm_cNombre', { path: "/" });
+    cookies.remove('Sgm_cNombre', { path: "/" });
     cookies.remove('usu_cClave', { path: "/" });
     //cookies.remove('Sgm_cObservaciones', { path: "/" });
     cookies.remove('token', { path: "/" });
     cookies.remove('IsLoged', { path: "/" });
+    cookies.remove('IsLogedIni', { path: "/" });
 
-
+    storage.DelStorage('Emp_cCodigo',"")
+    storage.DelStorage('Pan_cAnio',"")
     // Oculta la alerta después de cierto tiempo (opcional)
     setTimeout(() => {
       setShowAlert(false);

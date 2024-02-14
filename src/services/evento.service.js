@@ -36,7 +36,7 @@ function obtenerUsuario(dataJson) {
 }
 
 function obtenerEmpresas(dataJson) {
-  const url = 'https://localhost:44396/api/LOGIN/BuscarEmpresas';
+  const url = '/api/LOGIN/BuscarEmpresas';
   const options = { headers: authHeader(), body: JSON.stringify(dataJson) };
   const params = {};
 
@@ -48,7 +48,7 @@ function obtenerEmpresas(dataJson) {
 
 
 function obtenerAnios(dataJson) {
-  const url = 'https://localhost:44396/api/LOGIN/BuscarAnios';
+  const url = '/api/LOGIN/BuscarAnios';
   const options = { headers: authHeader(), body: JSON.stringify(dataJson) };
   const params = {};
 

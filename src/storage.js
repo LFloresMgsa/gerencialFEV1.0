@@ -12,9 +12,9 @@ export const storage = {
 
 function IniciaVariablesGlobales() {
 
-  SetStorage('Emp_cCodigo', '');
-  SetStorage('Pan_cAnio', '');
-  SetStorage('Carrito', []);
+//SetStorage('Emp_cCodigo', '');
+  //SetStorage('Pan_cAnio', '');
+  //SetStorage('Carrito', []);
   SetStorage('soft_cCodSoft','011');
   
 

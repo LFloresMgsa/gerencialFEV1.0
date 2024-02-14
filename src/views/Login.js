@@ -12,6 +12,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 import { storage } from "../storage.js";
 
+import Autocomplete from '@mui/material/Autocomplete';
 
 const cookies = new Cookies();
 
@@ -64,13 +65,26 @@ const Login = () => {
 	const [logeo, setLogeo] = useState('');
 	const [error, setError] = useState('');
 	const [Token, setToken] = useState('');
+
+	const [selEmpCodigo, setEmpCodigo] = useState('');
+	const [selPanAnio, setPanAnio] = useState('');
+	
+
 	const [showPassword, setShowPassword] = useState(false);
 
+	const [empresas, setEmpresas] = useState([]);
+	const [anios, setAnios] = useState([]);
+
+	const Emp_cCodigo = storage.GetStorage('Emp_cCodigo');
+	const soft_cCodSoft = storage.GetStorage('soft_cCodSoft');
+
+	let IsLogedIni = cookies.get('IsLogedIni');
+	let IsLoged = cookies.get('IsLoged');
 
 	const BuscarToken = async () => {
 
 		try {
-			let _body = { Accion: "LOGIN", usu_cCodUsuario: username, usu_cClave: password }
+			let _body = { Accion: "SEL_ALL", usu_cCodUsuario: username, usu_cClave: password }
 
 			//console.log(_body);
 
@@ -78,17 +92,13 @@ const Login = () => {
 			await eventoService.obtenerToken(_body).then(
 				(res) => {
 					setToken(res)
+					//console.log(res);
 				},
 				(error) => {
 					console.log(error);
 				}
 			);
 
-			  console.log('------------**********');
-			  console.log(username);
-			  console.log(password);
-			  console.log(Token);
-			  console.log('------------**********');
 
 
 			if (Token) {
@@ -102,41 +112,34 @@ const Login = () => {
 	};
 
 
-	const handleLogin = async () => {
+	const handleConect = async () => {
 
 		try {
-
-
 
 			// genera un token
 			await BuscarToken();
 
-			const Emp_cCodigo = storage.GetStorage('Emp_cCodigo');
-			const soft_cCodSoft = storage.GetStorage('soft_cCodSoft');
-			
+
+			// valida si encontro el token
+
 			if (!cookies.get('token')) {
 				throw "Error: Token no existe";
 			}
 
 			let _body = {
-				Accion: "LOGIN", usu_cCodUsuario: username, usu_cClave: password, Emp_cCodigo: Emp_cCodigo, 
-				soft_cCodSoft: soft_cCodSoft
-			  }
-
-
+				Accion: "LOGIN", usu_cCodUsuario: username, usu_cClave: password, Emp_cCodigo: '', soft_cCodSoft: soft_cCodSoft
+			}
 			let _result;
 
 
-
-
-
+			console.log(_body);
 			// si encontro el token ingresa el login
 			await eventoService.obtenerUsuario(_body).then(
 
 				(res) => {
+
 					setLogeo(res);
 					_result = res;
-					console.log(_result);
 				},
 				(error) => {
 					console.log(error);
@@ -145,112 +148,305 @@ const Login = () => {
 
 
 
-			console.log(_result.usuario);
-
 			if (_result.usuario === username && _result.respuesta === "1") {
 
 				cookies.set('Sgm_cUsuario', _result.usuario, { path: "/" });
-				//cookies.set('Sgm_cNombre', _result.nombre, { path: "/" });
-				//cookies.set('usu_cClave', _result.usu_cClave, { path: "/" });
-				//cookies.set('Sgm_cObservaciones', _result.Sgm_cObservaciones, { path: "/" });
+				cookies.set('Sgm_cNombre', _result.nombre, { path: "/" });
+				//cookies.set('Sgm_cContrasena', _result.clave, { path: "/" });
 				cookies.set('Sgm_cRole', _result.role, { path: "/" });
-				cookies.set('IsLoged', true, { path: "/" });
+				cookies.set('IsLoged', false, { path: "/" });
+				cookies.set('IsLogedIni', true, { path: "/" });
 
 
 				setError('');
 
 				if (cookies.get('token')) {
-					window.location.href = "./inicio";
+
+					IsLogedIni = true;
+
+					await BuscarEmpresas();
+
+					
+
+					//window.location.href = "./inicio";
+					console.log(soft_cCodSoft);
+					console.log(cookies.get('Sgm_cRole'));
 				}
-
-
 			}
 		} catch (error) {
 			setError('');
-
 		}
 	};
 
 
 
+	const BuscarEmpresas = async () => {
+
+		
+
+		try {
+
+			
 
 
-	
+			if (!cookies.get('token')) {
+				throw "Error: Token no existe";
+			}
 
+
+			let _body = {
+				Accion: "EMPRESA", usu_cCodUsuario: username, usu_cClave: password, Emp_cCodigo: '', soft_cCodSoft: soft_cCodSoft
+			}
+
+
+			
+
+			await eventoService.obtenerEmpresas(_body).then(
+
+				(res) => {
+
+					
+					
+
+					setEmpresas(res);
+
+				},
+				(error) => {
+					console.log(error);
+				}
+			);
+
+		} catch (error) {
+			setError('');
+		}
+	};
+
+	const BuscarAnios = async (empresa) => {
+
+		try {
+
+			if (!cookies.get('token')) {
+				throw "Error: Token no existe";
+			}
+
+			let _body = {
+				Accion: "ANIOS", usu_cCodUsuario: username, usu_cClave: password, Emp_cCodigo: empresa, soft_cCodSoft: soft_cCodSoft
+			}
+
+			await eventoService.obtenerAnios(_body).then(
+
+				(res) => {
+
+					setAnios(res);
+
+				},
+				(error) => {
+					console.log(error);
+				}
+			);
+
+		} catch (error) {
+			setError('');
+		}
+	};
+
+
+	const handleCancel = async () => {
+
+		try {
+			cookies.set('IsLogedIni', false, { path: "/" });
+			window.location.href = "../../login";
+
+		} catch (error) {
+			setError('');
+		}
+	};
+
+	const handleLogin = async () => {
+
+
+		try {
+
+			// valida si encontro el token
+
+			if (!cookies.get('token')) {
+				throw "Error: Token no existe";
+			}
+
+			cookies.set('IsLoged', true, { path: "/" });
+			cookies.set('IsLogedIni', true, { path: "/" });
+
+
+			setError('');
+
+			if (cookies.get('token')) {
+
+				IsLoged = true;
+
+				window.location.href = "./gestcon";
+				//console.log(soft_cCodSoft);
+				//console.log(cookies.get('Sgm_cRole'));
+			}
+
+		} catch (error) {
+			setError('');
+		}
+	};
+
+
+	const handleSelectionChangeEmpresa = async (event, value) => {
+		if (value !== null) {
+		  setEmpCodigo(value.emp_cCodigo);
+		  localStorage.setItem('Emp_cCodigo', value.emp_cCodigo); // Guarda emp_cCodigo en localStorage
+	  
+		  //console.log(value.emp_cCodigo);
+		  await BuscarAnios(value.emp_cCodigo);
+	  
+		  if (!anios) {
+			setAnios([]);
+		  }
+		}
+	  };
+	  
+	  const handleSelectionChangeAnio = async (event, value) => {
+		if (value !== null) {
+		  setPanAnio(value.pan_cAnio);
+		  localStorage.setItem('Pan_cAnio', value.pan_cAnio); // Guarda pan_cAnio en localStorage
+	  
+		  //console.log(value.pan_cAnio);
+		}
+	  };
 
 	return (
-		<Container component="main" maxWidth="xs" style={{ border: '1.5px solid #8b0000', borderRadius: '5px', padding: '16px' }}>
-			<Paper elevation={0}>
-				<form>
+		<Container maxWidth="sm">
+			<Grid container component='main' className={classes.root}>
+				<CssBaseline />
+				<Container component={Paper} elevation={5} maxWidth='xs' className={classes.container}>
+					<div className={classes.div}>
+						<Grid container spacing={1}>
+							<Grid item xs={12} lg={12}>
+								<Typography component='h1' variant='h5' className='custom-bar-text'>Ingreso Sistema</Typography>
+							</Grid>
+							<Grid item xs={12} lg={12}>
+								<form className={classes.form}>
+									{!IsLogedIni &&
+										<Grid container spacing={1}>
+											<Grid item xs={12} lg={12}>
+												<Typography variant='subtitle1' className='custom-bar-text'>Usuario:</Typography>
+												<TextField
+													fullWidth
+													autoFocus
+													margin='normal'
+													variant='outlined'
+													name='nickname'
+													value={username}
+													onChange={(e) => setUsername(e.target.value)}
+													className='custom-input'
+												/>
+											</Grid>
+											<Grid item xs={12} lg={12}>
+												<Typography variant='subtitle1' className='custom-bar-text'>Contraseña:</Typography>
+												<TextField
+													fullWidth
+													type='password'
+													margin='normal'
+													variant='outlined'
+													name='password'
+													value={password}
+													onChange={(e) => setPassword(e.target.value)}
+													className='custom-input'
+												/>
+											</Grid>
+											<Grid item xs={12} lg={12}>
+												<Button
+													fullWidth
+													variant='contained'
+													color='secondary'
+													className={classes.button}
+													onClick={handleConect}
+												>
+													Conectar
+												</Button>
+											</Grid>
+										</Grid>
+									}
 
-					<label style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center', color: 'darkred' }}>Ingreso al Sistema</label>
-					<div>.</div>
-					<div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', textAlign: 'left', fontWeight: 'bold' }}>
-						<label htmlFor="username">Usuario:</label>
-						<TextField
-							id="username"
-							autoFocus
-							variant="outlined"
-							margin="normal"
-							style={{ width: '200px' }}
-							value={username}
-							onChange={(e) => setUsername(e.target.value.toUpperCase())}
-							onKeyDown={(e) => {
-								if (e.key === 'Tab') {
-									e.preventDefault();
-									document.getElementById('password').focus();
-								}
-								if (e.key === 'Enter') {
-									e.preventDefault();
-									handleLogin();
-								}
-							}}
-							autoComplete="username"
-						/>
+									{IsLogedIni &&
+										<Grid container spacing={1}>
+											<Grid item xs={12} lg={12}>
+												<Typography variant='subtitle1' className='custom-bar-text'>Empresa:</Typography>
+												<Autocomplete
+													disablePortal
+													id="combo-empresas"
+													options={empresas}
+													onChange={handleSelectionChangeEmpresa}
+													getOptionLabel={(option) => `${option.emp_cCodigo} - ${option.emp_cNombreLargo}`}
+													renderInput={(params) => <TextField {...params} variant="standard" />}
+													className='custom-autocomplete'
+													renderOption={(props, option, state) => (
+														<li
+															{...props}
+															style={{ background: state.selected ? 'lightblue' : 'white' }}
+														>
+															{option.emp_cCodigo} - {option.emp_cNombreLargo}
+														</li>
+													)}
+												/>
+											</Grid>
+											<Grid item xs={12} lg={12}>
+												<Typography variant='subtitle1' className='custom-bar-text'>Año:</Typography>
+												<Autocomplete
+													disablePortal
+													id="combo-anios"
+													options={anios}
+													onChange={handleSelectionChangeAnio}
+													getOptionLabel={(option) => `${option.pan_cAnio}`}
+													renderInput={(params) => <TextField {...params} variant="standard" />}
+													className='custom-autocomplete'
+													renderOption={(props, option, state) => (
+														<li
+															{...props}
+															style={{ background: state.selected ? 'lightblue' : 'white' }}
+														>
+															{option.pan_cAnio}
+														</li>
+													)}
+												/>
+											</Grid>
+											<Grid item xs={12} lg={12}>
+												<Grid container spacing={1}>
+													<Grid item xs={6} lg={6}>
+														<Button
+															fullWidth
+															variant='contained'
+															color='secondary'
+															className={classes.button}
+															onClick={handleLogin}
+														>
+															Ingresar
+														</Button>
+													</Grid>
+													<Grid item xs={6} lg={6}>
+														<Button
+															fullWidth
+															variant='contained'
+															color='secondary'
+															className={classes.button}
+															onClick={handleCancel}
+														>
+															Cancelar
+														</Button>
+													</Grid>
+												</Grid>
+											</Grid>
+										</Grid>
+									}
+								</form>
+							</Grid>
+						</Grid>
 					</div>
-					{/* Etiqueta y campo de Contraseña */}
-					<div>.</div>
-					<div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', textAlign: 'left', marginTop: '-20px', fontWeight: 'bold' }}>
-
-						<label htmlFor="username">Contraseña:</label>
-						<TextField
-							id="password"
-							type={showPassword ? 'text' : 'password'}
-							variant="outlined"
-							margin="normal"
-							style={{ width: '200px' }}
-							value={password}
-							onChange={(e) => setPassword(e.target.value)}
-							onKeyPress={(e) => {
-								if (e.key === 'Enter') {
-									e.preventDefault();
-									handleLogin();
-								}
-							}}
-							autoComplete="current-password"
-							InputProps={{
-								endAdornment: (
-									<Button
-										onClick={() => setShowPassword(!showPassword)}
-										style={{ padding: 0, minWidth: 0 }}
-										disableRipple
-									>
-										{showPassword ? <Visibility /> : <VisibilityOff />}
-									</Button>
-								),
-							}}
-						/>
-					</div>
-
-					{/* Botón de Ingresar */}
-					<Button variant="contained" style={{ backgroundColor: '#8b0000', color: 'white' }} fullWidth onClick={handleLogin}>
-						Ingresar
-					</Button>
-				</form>
-			</Paper>
-
-			{/* ToastContainer para mostrar notificaciones */}
-			<ToastContainer />
+				</Container>
+			</Grid>
 		</Container>
 	);
 };
