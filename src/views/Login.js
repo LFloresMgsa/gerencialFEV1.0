@@ -232,7 +232,7 @@ const Login = () => {
 
 		try {
 			cookies.set('IsLogedIni', false, { path: "/" });
-			window.location.href = "../../gestcon";
+			window.location.href = "../../gerencial";
 
 
 
@@ -275,7 +275,7 @@ const Login = () => {
 
 				IsLoged = true;
 
-				window.location.href = "./gestcon";
+				window.location.href = "./gerencial";
 				//console.log(soft_cCodSoft);
 				//console.log(cookies.get('Sgm_cRole'));
 			}

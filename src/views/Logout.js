@@ -40,7 +40,7 @@ const Logout = () => {
     // Oculta la alerta después de cierto tiempo (opcional)
     setTimeout(() => {
       setShowAlert(false);
-      window.location.href = './gestcon'; // Redirige después de cerrar sesión
+      window.location.href = './gerencial'; // Redirige después de cerrar sesión
     }, 500); // 1000 milisegundos (1 segundo) - ajusta según sea necesario
   };
 

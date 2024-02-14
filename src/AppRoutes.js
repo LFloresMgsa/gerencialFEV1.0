@@ -17,11 +17,11 @@ const AppRoutes = (props) => {
   return (
     <Switch>
       <Route exact path="/" render={(route) => <Dashboard {...props} {...route} />}>
-        <Redirect to="/gestcon" />
+        <Redirect to="/gerencial" />
       </Route>
 
 
-      <Route path="/gestcon" render={(route) => <Dashboard {...props} {...route} />} />
+      <Route path="/gerencial" render={(route) => <Dashboard {...props} {...route} />} />
 
 
       <Route
@@ -37,7 +37,7 @@ const AppRoutes = (props) => {
         render={(route) => <Login {...props} {...route} />}
       /> */}
 
-      <Route render={() => <Redirect to="/gestcon" />} />
+      <Route render={() => <Redirect to="/gerencial" />} />
     </Switch>
   );
 };

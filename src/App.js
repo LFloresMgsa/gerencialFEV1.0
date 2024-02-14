@@ -100,7 +100,7 @@ function App(props) {
         <GlobalStyle theme={theme} />
         <AppTopBar />
         <Switch>
-          <Route path="/gestcon">
+          <Route path="/gerencial">
             {loading ? <LoadingCircle /> : <AppContent {...props} viewport={viewport} />}
           </Route>
           <Route path="/logout">
