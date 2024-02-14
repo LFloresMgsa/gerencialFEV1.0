@@ -83,31 +83,18 @@ const Login = () => {
 	let IsLoged = cookies.get('IsLoged');
 
 	const BuscarToken = async () => {
-
 		try {
-			let _body = { Accion: "SEL_ALL", usu_cCodUsuario: username, usu_cClave: password }
-
-			//console.log(_body);
-
+			let _body = { Accion: "SEL_ALL", usu_cCodUsuario: username, usu_cClave: password };
+	
 			// obtenemos el token
-			await eventoService.obtenerToken(_body).then(
-				(res) => {
-					setToken(res)
-					//console.log(res);
-				},
-				(error) => {
-					console.log(error);
-				}
-			);
-
-
-
-			if (Token) {
-				cookies.set('token', Token, { path: "/" });
-				//console.log(Token);
+			const token = await eventoService.obtenerToken(_body);
+			if (token) {
+				cookies.set('token', token, { path: "/" });
+				setToken(token);
 				setError('');
 			}
 		} catch (error) {
+			console.error('An error occurred while trying to login - token:', error);
 			setError('An error occurred while trying to login - token');
 		}
 	};
@@ -117,12 +104,12 @@ const Login = () => {
 		try {
 			// genera un token
 			await BuscarToken();
-
+	
 			// valida si encontro el token
 			if (!cookies.get('token')) {
 				throw "Error: Token no existe";
 			}
-
+	
 			let _body = {
 				Accion: "LOGIN",
 				usu_cCodUsuario: username,
@@ -131,7 +118,7 @@ const Login = () => {
 				soft_cCodSoft: soft_cCodSoft
 			};
 			let _result;
-
+	
 			console.log(_body);
 			// si encontro el token ingresa el login
 			await eventoService.obtenerUsuario(_body).then(
@@ -143,18 +130,16 @@ const Login = () => {
 					console.log(error);
 				}
 			);
-
-			//const response = { usuario: 'usuario', respuesta: '0' };
-
+	
 			if (_result.usuario === username && _result.respuesta === "1") {
 				cookies.set('Sgm_cUsuario', _result.usuario, { path: "/" });
 				cookies.set('Sgm_cNombre', _result.nombre, { path: "/" });
 				cookies.set('Sgm_cRole', _result.role, { path: "/" });
 				cookies.set('IsLoged', false, { path: "/" });
 				cookies.set('IsLogedIni', true, { path: "/" });
-
+	
 				setError('');
-
+	
 				if (cookies.get('token')) {
 					IsLogedIni = true;
 					await BuscarEmpresas();
@@ -167,6 +152,7 @@ const Login = () => {
 			}
 		} catch (error) {
 			console.error('Error en el inicio de sesión:', error);
+			setError('Error en el inicio de sesión: ' + error);
 		}
 	};
 
