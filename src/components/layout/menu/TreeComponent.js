@@ -4,20 +4,33 @@ import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import Typography from '@mui/material/Typography';
 import FolderOpen from '@mui/icons-material/FolderOpenOutlined';
 import SidebarDataClass from './SidebarDataClass.js';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'; 
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { withRouter } from 'react-router-dom'; 
+import { withRouter } from 'react-router-dom';
+import Cookies from 'universal-cookie';
+const cookies = new Cookies();
 
-const TreeComponent = ({ history }) => { 
+const TreeComponent = ({ history }) => {
   const [expandedNodes, setExpandedNodes] = useState([]);
-  
-  const sidebarData = SidebarDataClass.getSidebarData();
+  const [sidebarData, setSidebarData] = useState([]);
 
   useEffect(() => {
     const initialExpandedNodes = JSON.parse(localStorage.getItem('expandedNod')) || [];
     setExpandedNodes(initialExpandedNodes);
+  
+    // Obtener el rol del usuario desde las cookies
+    const userRole = cookies.get('Sgm_cRole');
+    console.log('UserRole:', userRole);
+  
+    // Obtener los datos de la barra lateral según el rol del usuario
+    const sidebarData = SidebarDataClass.getSidebarData(userRole);
+    console.log('SidebarData:', sidebarData);
+  
+    // Ordenar los datos de la barra lateral por el orden de la pestaña
+    const sortedSidebarData = sidebarData.sort((a, b) => (a.tabOrder > b.tabOrder ? 1 : -1));
+  
+    setSidebarData(sortedSidebarData);
   }, []);
-
   const MyTreeItem = ({ label, icon: Icon, fontSize, ...props }) => {
     return (
       <TreeItem
@@ -55,20 +68,7 @@ const TreeComponent = ({ history }) => {
   );
 
   const handleNodeClick = (path) => {
-    switch(path) {
-      case '/gerencial':
-        history.push(path);
-        break;
-      case '/reportes':
-        history.push(path);
-        break;
-      case '/avances':
-        history.push(path);
-        break;
-      default:
-        //console.log('Abrir URL:', path);
-        break;
-    }
+    history.push(path);
   };
 
   const handleNodeToggle = (event, nodeIds) => {
@@ -89,4 +89,4 @@ const TreeComponent = ({ history }) => {
   );
 };
 
-export default withRouter(TreeComponent); 
+export default withRouter(TreeComponent);
