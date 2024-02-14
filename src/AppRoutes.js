@@ -4,7 +4,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import Dashboard from './views/Dashboard';
 
 import Logout from './views/Logout';
-import Login from './views/Login';
+
 
 import Cookies from 'universal-cookie';
 const cookies = new Cookies();
@@ -31,11 +31,11 @@ const AppRoutes = (props) => {
       />
 
 
-<Route
+{/* <Route
         exact
         path="/login"
         render={(route) => <Login {...props} {...route} />}
-      />
+      /> */}
 
       <Route render={() => <Redirect to="/gestcon" />} />
     </Switch>
