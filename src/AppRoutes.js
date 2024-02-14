@@ -3,8 +3,12 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 
 import Dashboard from './views/Dashboard';
 
+import Reportes from './views/Reportes';
+import Avances from './views/Avances';
+
 import Logout from './views/Logout';
 
+import TreeComponent from './components/layout/menu/TreeComponent';
 
 import Cookies from 'universal-cookie';
 const cookies = new Cookies();
@@ -30,8 +34,13 @@ const AppRoutes = (props) => {
         render={(route) => <Logout {...props} {...route} />}
       />
 
+      <Route path='/gerencial' render={(route) => <Dashboard {...route} />} />
 
-{/* <Route
+      <Route path='/reportes' render={(route) => <Reportes {...route} />} />
+
+
+      <Route path='/avances' render={(route) => <Avances {...route} />} />
+      {/* <Route
         exact
         path="/login"
         render={(route) => <Login {...props} {...route} />}
