@@ -1,0 +1,24 @@
+.Manual {
+    color: aliceblue;
+    font-size: 40px;
+    text-align: center;
+    margin: 0;
+    position: absolute;
+    left: 21%;
+    letter-spacing: 10px; /* Ajusta el valor según sea necesario */
+}
+
+.Imagen {
+    position: absolute;
+    left: 0%; /* Puedes ajustar el valor según tus necesidades */
+    top: 0; /* Ajusta la posición vertical según tus necesidades */
+    /* Otros estilos según sea necesario */
+}
+
+.Imageninicio {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-30%, -42%);
+    height: '100vh';
+}
