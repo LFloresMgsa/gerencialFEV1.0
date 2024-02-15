@@ -6,20 +6,18 @@ import { storage } from "../../storage.js";
 import {
   Paper, Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Box, Typography, Divider, TextField, InputAdornment,
-  Button, CircularProgress
+  Button, Select, MenuItem
 } from '@mui/material';
 import AppFooter from '../../components/layout/AppFooter.js';
 import SearchIcon from '@mui/icons-material/Search';
 import { styled, css } from '@mui/system';
-import IconButton from '@mui/material/IconButton';
-import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
-import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
-import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
+
 import fondo from '../../imagenes/fondotodos.png'
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import Swal from 'sweetalert2';
-import { parseISO, format } from 'date-fns';
+
+import Cookies from 'universal-cookie';
+const cookies = new Cookies();
 
 const Rep_movimientos_usuarios = (props) => {
 
@@ -37,31 +35,77 @@ const Rep_movimientos_usuarios = (props) => {
   const [searchTermRestriccion, setSearchTermRestriccion] = useState('');
   const [searchTermTipo, setSearchTermTipo] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(50);
 
-
-
+  const [anios, setAnios] = useState([]);
+  // Estado para almacenar los años
+  const [empresas, setEmpresa] = useState([]);
   // Cargar al inicio de la página
   useEffect(() => {
     listar();
+    listarAnio();
+    listarEmpresa();
   }, []);
 
 
-  const listar = async () => {
+  const listarAnio = async () => {
     let _body = {
-      Accion: "MOV_USUARIO", Emp_cCodigo: '', Pan_cAnio: '2024', Per_cperiodo: '',
+      Accion: "MOV_ANIOS"
+    };
+
+    try {
+      const res = await eventoService.obtenerMovimientoUsuario(_body);
+      if (res && Array.isArray(res)) { // Verifica si res es un array
+        const anios = res.map(item => item.pan_cAnio); // Extrae solo los valores de Pan_cAnio
+        setAnios(anios); // Almacena los años en el estado
+        //console.log(anios);
+      } else {
+        console.error("Error: No se obtuvieron datos de años o los datos están en un formato incorrecto.");
+      }
+    } catch (error) {
+      console.error("Error al obtener datos de años:", error);
+    }
+  };
+
+  const _Usuario = cookies.get('Sgm_cUsuario');
+
+  const listarEmpresa = async () => {
+    let _body = {
+      Accion: "MOV_EMPRESAS",
+      Usuario: _Usuario,
+      soft_cCodSoft: '001'
+    };
+
+    try {
+      const res = await eventoService.obtenerMovimientoUsuario(_body);
+      if (res && Array.isArray(res)) { // Verifica si res es un array
+        const empresaNom = res.map(item => item.emp_cNombreLargo); // Extrae solo los valores de Pan_cAnio
+        setEmpresa(empresaNom); // Almacena los años en el estado
+        console.log(empresaNom);
+      } else {
+        console.error("Error: No se obtuvieron datos de años o los datos están en un formato incorrecto.");
+      }
+    } catch (error) {
+      console.error("Error al obtener datos de años:", error);
+    }
+  };
+
+
+
+
+  const listar = async (anioSeleccionado) => {
+    let _body = {
+      Accion: "MOV_USUARIO",
+      Emp_cCodigo: '',
+      Pan_cAnio: anioSeleccionado, // Usar el año seleccionado en el cuerpo de la solicitud
+      Per_cperiodo: '',
       Lib_cTipoLibro: ''
     };
 
-    console.log(_body);
     try {
       const res = await eventoService.obtenerMovimientoUsuario(_body);
-
-      console.log("Respuesta de la API:", res);
-
       if (res) {
         setData(res);
-        console.log("setData", res); // Convertimos el objeto en un array con un solo elemento
       } else {
         console.error("Error: No se obtuvieron datos o los datos están en un formato incorrecto.");
       }
@@ -70,29 +114,20 @@ const Rep_movimientos_usuarios = (props) => {
     }
   };
 
-
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
 
-  console.log("Data:", data);
-  console.log("Search term:", searchTermRestriccion);
   const filteredData = (data || []).filter((item) => {
-    console.log("Item:", item); // Puedes agregar esto para ver cada elemento
-    return item?.emp_cNombreLargo?.toLowerCase().includes(searchTermRestriccion.toLowerCase())
+    const nombreLargoMatch = item?.emp_cNombreLargo?.toLowerCase().includes(searchTermRestriccion.toLowerCase());
+    const anioMatch = item?.pan_cAnio === searchTermTipo; // Verifica si el año coincide
+    return nombreLargoMatch && anioMatch; // Devuelve true si tanto el nombre como el año coinciden
   });
-  console.log("Filtered Data:", filteredData);
-
-  console.log("Tipo de currentData:", typeof currentData);
-  console.log("Contenido de currentData:", currentData);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  console.log("Filtered Data:", filteredData);
   const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-  console.log("Current Data:", currentData);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
 
   const FooterRoot = styled('footer')(
     ({ theme }) => css`
@@ -142,14 +177,22 @@ const Rep_movimientos_usuarios = (props) => {
     `
   );
 
-
   const limpiarcampos = () => {
     setSearchTermRestriccion('');
     setSearchTermTipo('');
-  }
+    setPermitirBusqueda(false); // Limpiar el estado de permitir búsqueda
+  };
 
-
-
+  const buscar = () => {
+    // Verificar si ambos campos están seleccionados
+    if (searchTermRestriccion && searchTermTipo) {
+      // Realizar la búsqueda
+      listar(searchTermTipo);
+    } else {
+      console.log("Por favor seleccione la empresa y el año antes de realizar la búsqueda.");
+    }
+  };
+  
   return (
     <div style={{ ...fondoStyle, marginTop: '35px' }}>
       <Paper
@@ -162,9 +205,7 @@ const Rep_movimientos_usuarios = (props) => {
             theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
         }}
       >
-
         <Box>
-
           <Typography
             variant="h5"
             color="black"
@@ -174,41 +215,45 @@ const Rep_movimientos_usuarios = (props) => {
           >
             MOVIMIENTOS POR USUARIOS
           </Typography>
-
-
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <TextField
-              label="Buscar por Url"
-              variant="outlined"
-              size="small"
-              value={searchTermRestriccion}
-              onChange={(e) => setSearchTermRestriccion(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <SearchIcon style={{ color: '#8b0000' }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ marginRight: '20px' }}
-            />
-
-            <TextField
-              label="Buscar por Usuario"
-              variant="outlined"
-              size="small"
-              value={searchTermTipo}
-              onChange={(e) => setSearchTermTipo(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <SearchIcon style={{ color: '#8b0000' }} />
-                  </InputAdornment>
-                ),
-              }}
-            />
+          <Box sx={{ display: 'row ', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography sx={{ marginRight: '10px', fontWeight: 'bold' }}>Empresa:</Typography>
+                <Select
+                  value={searchTermRestriccion}
+                  onChange={(e) => {
+                    setSearchTermRestriccion(e.target.value);
+                  }}
+                  variant="outlined"
+                  size="small"
+                  sx={{ width: 700 }}
+                >
+                  {empresas.map((empresaNom) => (
+                    <MenuItem key={empresaNom} value={empresaNom}>{empresaNom}</MenuItem>
+                  ))}
+                </Select>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography sx={{ marginRight: '10px', fontWeight: 'bold' }}>Año:</Typography>
+                <Select
+                  value={searchTermTipo}
+                  onChange={(e) => {
+                    setSearchTermTipo(e.target.value);
+                    listar(e.target.value);
+                  }}
+                  variant="outlined"
+                  size="small"
+                  sx={{ width: 150 }}
+                >
+                  {anios.map((anio) => (
+                    <MenuItem key={anio} value={anio}>{anio}</MenuItem>
+                  ))}
+                </Select>
+              </Box>
+            </Box>
           </Box>
+
+
           <Button
             variant="contained"
             onClick={limpiarcampos}
@@ -216,67 +261,43 @@ const Rep_movimientos_usuarios = (props) => {
           >
             Limpiar Campos
           </Button>
+
           <TableContainer component={Paper}>
             <Table aria-label="customized table">
               <TableHead>
                 <TableRow>
-                  <TableCell align="left"
-                    sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}
-                  >Emp_cCodigo</TableCell>
-
-                  <TableCell align="left"
-                    sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}
-                  >Empresa</TableCell>
-                  <TableCell align="center"
-                    sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}
-                  >RUC</TableCell>
-                  <TableCell align="left"
-                    sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}
-                  >Año</TableCell>
-                  <TableCell align="left"
-                    sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}
-                  >Periodo</TableCell>
-                  <TableCell align="left"
-                    sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}
-                  >Desc.Periodo</TableCell>
-                  <TableCell align="left"
-                    sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}
-                  >Usuario</TableCell>
-                  <TableCell align="center"
-                    sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}
-                  >Tipo de Libro</TableCell>
-                  <TableCell align="left"
-                    sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}
-                  >Descripcion</TableCell>
-                  <TableCell align="left"
-                    sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}
-                  >Registros</TableCell>
-                  <TableCell align="left"
-                    sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}
-                  >Fecha de Creación</TableCell>
+                  <TableCell align="left" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Emp_cCodigo</TableCell>
+                  <TableCell align="left" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Empresa</TableCell>
+                  <TableCell align="center" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>RUC</TableCell>
+                  <TableCell align="left" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Año</TableCell>
+                  <TableCell align="center" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Periodo</TableCell>
+                  <TableCell align="left" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Desc.Periodo</TableCell>
+                  <TableCell align="left" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Usuario</TableCell>
+                  <TableCell align="center" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Tipo de Libro</TableCell>
+                  <TableCell align="left" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Descripcion</TableCell>
+                  <TableCell align="center" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Registros</TableCell>
+                  <TableCell align="left" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Fecha de Creación</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {console.log("Current Data:", currentData)}
                 {currentData.map((item, index) => (
                   <TableRow key={index}>
                     <TableCell align="left">{item.emp_cCodigo}</TableCell>
                     <TableCell align="left">{item.emp_cNombreLargo}</TableCell>
                     <TableCell align="left">{item.emp_cNumRuc}</TableCell>
                     <TableCell align="left">{item.pan_cAnio}</TableCell>
-                    <TableCell align="left">{item.per_cPeriodo}</TableCell>
+                    <TableCell align="center">{item.per_cPeriodo}</TableCell>
                     <TableCell align="left">{item.per_cDescripPeriodo}</TableCell>
                     <TableCell align="left">{item.ase_cUserCrea}</TableCell>
                     <TableCell align="center">{item.lib_cTipoLibro}</TableCell>
                     <TableCell align="left">{item.lib_cDescripcion}</TableCell>
-                    <TableCell align="left">{item.registros}</TableCell>
+                    <TableCell align="center">{item.registros}</TableCell>
                     <TableCell align="left">{item.creacion}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
-
           <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '10px', alignItems: 'center' }}>
             <Typography variant="body2" color="textSecondary" sx={{ marginRight: '10px', fontWeight: 'bold' }}>
               Página {currentPage} de {totalPages}
@@ -312,7 +333,6 @@ const Rep_movimientos_usuarios = (props) => {
               <NavigateNextIcon />
             </Button>
           </Box>
-
         </Box>
       </Paper>
       <FooterRoot>

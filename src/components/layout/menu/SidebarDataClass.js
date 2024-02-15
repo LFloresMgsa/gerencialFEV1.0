@@ -26,7 +26,7 @@ class SidebarDataClass {
                 className: '',
                 iconClosed: <RiArrowDownSFill />,
                 iconOpened: <RiArrowUpSFill />,
-                role: 'Root, Administrator ',
+                role: 'User, Administrator ',
                 tabOrder: 2,
                 subNav: [
 
@@ -52,7 +52,7 @@ class SidebarDataClass {
                 className: '',
                 iconClosed: <RiArrowDownSFill />,
                 iconOpened: <RiArrowUpSFill />,
-                role: 'Administrator',
+                role: ' Administrator, User ',
                 tabOrder: 4,
                 subNav: []
             },
