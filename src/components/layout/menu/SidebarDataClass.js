@@ -4,7 +4,7 @@ import { IoIosPaper } from 'react-icons/io';
 import { RiArrowDownSFill, RiArrowUpSFill } from 'react-icons/ri';
 
 class SidebarDataClass {
-    static getSidebarData(userRole, empCode) {
+    static getSidebarData(userRole) {
         const sidebarData = [
             {
                 title: 'Inicio',
@@ -63,10 +63,6 @@ class SidebarDataClass {
             return sidebarData.filter(item => item.role.includes(userRole));
         }
 
-        // Si el usuario no está autenticado con Emp_cCodigo o su rol es 'All', mostramos todas las opciones
-        if (!empCode) {
-            return sidebarData.filter(item => item.role.includes('All'));
-        }
 
         return [];
     }

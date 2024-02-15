@@ -23,12 +23,12 @@ const TreeComponent = ({ history }) => {
     const userRole = cookies.get('Sgm_cRole');
     //console.log('UserRole:', userRole);
 
-    // Obtener el código de la empresa del usuario desde las cookies
-    const userEmpCode = storage.GetStorage('Emp_cCodigo');
-    // console.log('EmpCode:', userEmpCode);
+    // // Obtener el código de la empresa del usuario desde las cookies
+    // const userEmpCode = storage.GetStorage('Emp_cCodigo');
+    // // console.log('EmpCode:', userEmpCode);
 
     // Verificar si el usuario está autenticado con Emp_cCodigo y tiene un rol asignado
-    if (userEmpCode && userRole) {
+    if (userRole) {
       // Obtener los datos de la barra lateral según el rol del usuario
       const sidebarData = SidebarDataClass.getSidebarData(userRole);
       // console.log('SidebarData:', sidebarData);

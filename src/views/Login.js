@@ -66,22 +66,15 @@ const Login = () => {
 	const [error, setError] = useState('');
 	const [Token, setToken] = useState('');
 
-	const [selEmpCodigo, setEmpCodigo] = useState('');
-	const [selPanAnio, setPanAnio] = useState('');
 
 
 	const [showPassword, setShowPassword] = useState(false);
 
-	const [empresas, setEmpresas] = useState([]);
-	const [anios, setAnios] = useState([]);
+
 
 	const Emp_cCodigo = storage.GetStorage('Emp_cCodigo');
 	const soft_cCodSoft = storage.GetStorage('soft_cCodSoft');
 
-	const [showLoginForm, setShowLoginForm] = useState(true);
-
-	let IsLogedIni = cookies.get('IsLogedIni');
-	let IsLoged = cookies.get('IsLoged');
 
 	const BuscarToken = async () => {
 		try {
@@ -101,13 +94,14 @@ const Login = () => {
 	};
 
 
-	const handleConect = async () => {
+	const handleLogin = async () => {
 		try {
-			// genera un token
+			// Genera un token
 			await BuscarToken();
-
-			// valida si encontro el token
-			if (!cookies.get('token')) {
+			const token = cookies.get("token");
+			//console.log(token);
+			// Valida si encontró el token
+			if (!token) {
 				throw "Error: Token no existe";
 			}
 
@@ -120,8 +114,7 @@ const Login = () => {
 			};
 			let _result;
 
-			//console.log(_body);
-			// si encontro el token ingresa el login
+			// Si encontró el token ingresa al login
 			await eventoService.obtenerUsuario(_body).then(
 				(res) => {
 					setLogeo(res);
@@ -132,330 +125,101 @@ const Login = () => {
 				}
 			);
 
+
+
 			if (_result.usuario === username && _result.respuesta === "1") {
 				cookies.set('Sgm_cUsuario', _result.usuario, { path: "/" });
 				cookies.set('Sgm_cNombre', _result.nombre, { path: "/" });
 				cookies.set('Sgm_cRole', _result.role, { path: "/" });
-				cookies.set('IsLoged', false, { path: "/" });
-				cookies.set('IsLogedIni', true, { path: "/" });
-
+				cookies.set('IsLoged', true, { path: "/" });
+				//cookies.set('IsLogedIni', true, { path: "/" });
 				setError('');
-				setShowLoginForm(false);
-				if (cookies.get('token')) {
-					IsLogedIni = true;
-					await BuscarEmpresas();
 
+				if (token) {
+					window.location.href = "./gerencial";
 				}
-				toast.success("Conectado exitoso.");
-			} else {
-				// Si el inicio de sesión falla, muestra una alerta de error
-				//toast.error("El usuario y la contraseña no coinciden.");
-				//alert("El usuario y la contraseña no coinciden.");
 			}
 		} catch (error) {
-			console.error('Error en el inicio de sesión:', error);
-			setError('Error en el inicio de sesión: ' + error);
-		}
-	};
-
-
-	const BuscarEmpresas = async () => {
-
-
-
-		try {
-
-
-
-
-			if (!cookies.get('token')) {
-				throw "Error: Token no existe";
-			}
-
-
-			let _body = {
-				Accion: "EMPRESA", usu_cCodUsuario: username, usu_cClave: password, Emp_cCodigo: '', soft_cCodSoft: soft_cCodSoft
-			}
-
-
-
-
-			await eventoService.obtenerEmpresas(_body).then(
-
-				(res) => {
-
-
-
-
-					setEmpresas(res);
-
-				},
-				(error) => {
-					console.log(error);
-				}
-			);
-
-		} catch (error) {
 			setError('');
-		}
-	};
+			console.error('Error durante el inicio de sesión:', error);
 
-	const BuscarAnios = async (empresa) => {
-
-		try {
-
-			if (!cookies.get('token')) {
-				throw "Error: Token no existe";
-			}
-
-			let _body = {
-				Accion: "ANIOS", usu_cCodUsuario: username, usu_cClave: password, Emp_cCodigo: empresa, soft_cCodSoft: soft_cCodSoft
-			}
-
-			await eventoService.obtenerAnios(_body).then(
-
-				(res) => {
-
-					setAnios(res);
-
-				},
-				(error) => {
-					console.log(error);
-				}
-			);
-
-		} catch (error) {
-			setError('');
-		}
-	};
-
-
-	const handleCancel = async () => {
-
-		try {
-			cookies.set('IsLogedIni', false, { path: "/" });
-			window.location.href = "../../gerencial";
-
-
-
-			cookies.remove('Sgm_cUsuario', { path: "/" });
-			cookies.remove('Sgm_cRole', { path: "/" });
-			cookies.remove('Sgm_cNombre', { path: "/" });
-			cookies.remove('usu_cClave', { path: "/" });
-			//cookies.remove('Sgm_cObservaciones', { path: "/" });
-			cookies.remove('token', { path: "/" });
-			cookies.remove('IsLoged', { path: "/" });
-			cookies.remove('IsLogedIni', { path: "/" });
-
-			storage.DelStorage('Emp_cCodigo', "")
-			storage.DelStorage('Pan_cAnio', "")
-
-
-		} catch (error) {
-			setError('');
-		}
-	};
-
-	const handleLogin = async () => {
-
-
-		try {
-
-			// valida si encontro el token
-
-			if (!cookies.get('token')) {
-				throw "Error: Token no existe";
-			}
-
-			cookies.set('IsLoged', true, { path: "/" });
-			cookies.set('IsLogedIni', true, { path: "/" });
-
-
-			setError('');
-
-			if (cookies.get('token')) {
-
-				IsLoged = true;
-
-				window.location.href = "./gerencial";
-				//console.log(soft_cCodSoft);
-				//console.log(cookies.get('Sgm_cRole'));
-			}
-
-		} catch (error) {
-			setError('');
-		}
-	};
-
-
-	const handleSelectionChangeEmpresa = async (event, value) => {
-		if (value !== null) {
-			setEmpCodigo(value.emp_cCodigo);
-			localStorage.setItem('Emp_cCodigo', value.emp_cCodigo); // Guarda emp_cCodigo en localStorage
-
-			//console.log(value.emp_cCodigo);
-			await BuscarAnios(value.emp_cCodigo);
-
-			if (!anios) {
-				setAnios([]);
-			}
-		}
-	};
-
-	const handleSelectionChangeAnio = async (event, value) => {
-		if (value !== null) {
-			setPanAnio(value.pan_cAnio);
-			localStorage.setItem('Pan_cAnio', value.pan_cAnio); // Guarda pan_cAnio en localStorage
-
-			//console.log(value.pan_cAnio);
+			// Muestra una notificación en caso de error
+			toast.error('Usuario o contraseña incorrectos', {
+				position: toast.POSITION.TOP_CENTER,
+			});
 		}
 	};
 
 
 	return (
-		<Container component="main" style={{ border: '1.5px solid #8b0000', borderRadius: '5px', padding: '16px' }}>
+		<Container component="main" maxWidth="xs" style={{ border: '1.5px solid #8b0000', borderRadius: '5px', padding: '16px' }}>
 			<Paper elevation={0}>
+				<form>
 
-				{showLoginForm ? (
-					<form>
-						<label style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center', color: 'darkred' }}>Ingreso al Sistema</label>
-						<div>.</div>
-						<div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', textAlign: 'left', fontWeight: 'bold' }}>
-							<label htmlFor="username">Usuario:</label>
-							<TextField
-								id="username"
-								autoFocus
-								variant="outlined"
-								margin="normal"
-								style={{ width: '200px' }}
-								value={username}
-								onChange={(e) => setUsername(e.target.value.toUpperCase())}
-								onKeyDown={(e) => {
-									if (e.key === 'Tab') {
-										e.preventDefault();
-										document.getElementById('password').focus();
-									}
-									if (e.key === 'Enter') {
-										e.preventDefault();
-										handleConect();
-									}
-								}}
-								autoComplete="username"
-							/>
-						</div>
-						{/* Etiqueta y campo de Contraseña */}
-						<div>.</div>
-						<div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', textAlign: 'left', marginTop: '-20px', fontWeight: 'bold' }}>
-							<label htmlFor="username">Contraseña:</label>
-							<TextField
-								id="password"
-								type={showPassword ? 'text' : 'password'}
-								variant="outlined"
-								margin="normal"
-								style={{ width: '200px' }}
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-								onKeyPress={(e) => {
-									if (e.key === 'Enter') {
-										e.preventDefault();
-										handleConect();
-									}
-								}}
-								autoComplete="current-password"
-								InputProps={{
-									endAdornment: (
-										<Button
-											onClick={() => setShowPassword(!showPassword)}
-											style={{ padding: 0, minWidth: 0 }}
-											disableRipple
-										>
-											{showPassword ? <Visibility /> : <VisibilityOff />}
-										</Button>
-									),
-								}}
-							/>
-						</div>
+					<label style={{ fontWeight: 'bold', fontSize: '1.2em', textAlign: 'center', color: 'darkred' }}>Ingreso al Sistema</label>
+					<div>.</div>
+					<div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', textAlign: 'left', fontWeight: 'bold' }}>
+						<label htmlFor="username">Usuario:</label>
+						<TextField
+							id="username"
+							autoFocus
+							variant="outlined"
+							margin="normal"
+							style={{ width: '200px' }}
+							value={username}
+							onChange={(e) => setUsername(e.target.value.toUpperCase())}
+							onKeyDown={(e) => {
+								if (e.key === 'Tab') {
+									e.preventDefault();
+									document.getElementById('password').focus();
+								}
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									handleLogin();
+								}
+							}}
+							autoComplete="username"
+						/>
+					</div>
+					{/* Etiqueta y campo de Contraseña */}
+					<div>.</div>
+					<div style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', textAlign: 'left', marginTop: '-20px', fontWeight: 'bold' }}>
 
-						{/* Botón de Ingresar */}
-						<Button variant="contained" style={{ backgroundColor: '#8b0000', color: 'white' }} fullWidth onClick={handleConect} >
-							Conectar
-						</Button>
-					</form>
-				) : (
-
-					<form >
-						<div>.</div>
-
-
-						{IsLogedIni && (
-
-
-							<Grid container spacing={1} style={{ marginBottom: '10px', display: 'flex', flexDirection: 'column', textAlign: 'left', fontWeight: 'bold' }}>
-								<Grid item xs={12} lg={12}>
-									<Typography variant='subtitle1' style={{ marginBottom: '5px', fontWeight: 'bold', fontSize: '15px' , width: '200px' }}>Empresa:</Typography>
-									<Autocomplete
-										disablePortal
-
-										id="combo-empresas"
-										options={empresas}
-										onChange={handleSelectionChangeEmpresa}
-										getOptionLabel={(option) => `${option.emp_cCodigo} - ${option.emp_cNombreLargo}`}
-										renderInput={(params) => <TextField {...params} variant="outlined" />}
-										renderOption={(props, option, state) => (
-											<li
-												{...props}
-												style={{ background: state.selected ? 'lightblue' : 'white' }}
-											>
-												{option.emp_cCodigo} - {option.emp_cNombreLargo}
-											</li>
-										)}
-									/>
-								</Grid>
-								<Grid item xs={12} lg={12}>
-									<Typography variant='subtitle1' style={{ marginBottom: '5px', fontWeight: 'bold', fontSize: '15px' }}>Año:</Typography>
-									<Autocomplete
-										disablePortal
-										id="combo-anios"
-										options={anios}
-										onChange={handleSelectionChangeAnio}
-										getOptionLabel={(option) => `${option.pan_cAnio}`}
-										renderInput={(params) => <TextField {...params} variant="outlined" />}
-										renderOption={(props, option, state) => (
-											<li
-												{...props}
-												style={{ background: state.selected ? 'lightblue' : 'white' }}
-											>
-												{option.pan_cAnio}
-											</li>
-										)}
-									/>
-								</Grid>
-								<Grid item xs={12} lg={12}>
+						<label htmlFor="username">Contraseña:</label>
+						<TextField
+							id="password"
+							type={showPassword ? 'text' : 'password'}
+							variant="outlined"
+							margin="normal"
+							style={{ width: '200px' }}
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							onKeyPress={(e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									handleLogin();
+								}
+							}}
+							autoComplete="current-password"
+							InputProps={{
+								endAdornment: (
 									<Button
-										fullWidth
-										variant='contained'
-										style={{ backgroundColor: '#8b0000', color: 'white', marginTop: '10px' }}
-										onClick={handleLogin}
+										onClick={() => setShowPassword(!showPassword)}
+										style={{ padding: 0, minWidth: 0 }}
+										disableRipple
 									>
-										Ingresar
+										{showPassword ? <Visibility /> : <VisibilityOff />}
 									</Button>
-								</Grid>
-								<Grid item xs={12} lg={12}>
-									<Button
-										fullWidth
-										variant='contained'
-										style={{ backgroundColor: '#8b0000', color: 'white', marginTop: '10px' }}
-										onClick={handleCancel}
-									>
-										Cancelar
-									</Button>
-								</Grid>
-							</Grid>
-						)}
-					</form>
+								),
+							}}
+						/>
+					</div>
 
-				)}
-
+					{/* Botón de Ingresar */}
+					<Button variant="contained" style={{ backgroundColor: '#8b0000', color: 'white' }} fullWidth onClick={handleLogin}>
+						Ingresar
+					</Button>
+				</form>
 			</Paper>
 
 			{/* ToastContainer para mostrar notificaciones */}

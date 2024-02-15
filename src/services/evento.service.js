@@ -8,9 +8,23 @@ export const eventoService = {
   //obtenerFiles,
   obtenerToken,
   obtenerEmpresas,
-  obtenerAnios
+  obtenerMovimientoUsuario,
+  obtenerAnios,
   
 };
+
+function obtenerMovimientoUsuario(dataJson) {
+  const url = '/api/GERENCIA/MovimientosPorUsuario';
+  const options = { headers: authHeader(), body: JSON.stringify(dataJson) };
+  const params = {};
+
+
+  return Fetch.post(url, params, options).then((res) =>
+    handleResponse(res, false)
+  );
+
+}
+
 
 function obtenerToken(dataJson) {
   const url = '/api/LOGIN';
@@ -56,6 +70,6 @@ function obtenerAnios(dataJson) {
   return Fetch.post(url, params, options).then((res) =>
     handleResponse(res, false)
   );
+
+
 }
-
-
