@@ -8,6 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { withRouter } from 'react-router-dom';
 import Cookies from 'universal-cookie';
+import { storage } from '../../../storage.js'
 const cookies = new Cookies();
 
 const TreeComponent = ({ history }) => {
@@ -17,20 +18,45 @@ const TreeComponent = ({ history }) => {
   useEffect(() => {
     const initialExpandedNodes = JSON.parse(localStorage.getItem('expandedNod')) || [];
     setExpandedNodes(initialExpandedNodes);
-  
+
     // Obtener el rol del usuario desde las cookies
     const userRole = cookies.get('Sgm_cRole');
-    console.log('UserRole:', userRole);
-  
-    // Obtener los datos de la barra lateral según el rol del usuario
-    const sidebarData = SidebarDataClass.getSidebarData(userRole);
-    console.log('SidebarData:', sidebarData);
-  
-    // Ordenar los datos de la barra lateral por el orden de la pestaña
-    const sortedSidebarData = sidebarData.sort((a, b) => (a.tabOrder > b.tabOrder ? 1 : -1));
-  
-    setSidebarData(sortedSidebarData);
+    //console.log('UserRole:', userRole);
+
+    // Obtener el código de la empresa del usuario desde las cookies
+    const userEmpCode = storage.GetStorage('Emp_cCodigo');
+    // console.log('EmpCode:', userEmpCode);
+
+    // Verificar si el usuario está autenticado con Emp_cCodigo y tiene un rol asignado
+    if (userEmpCode && userRole) {
+      // Obtener los datos de la barra lateral según el rol del usuario
+      const sidebarData = SidebarDataClass.getSidebarData(userRole);
+      // console.log('SidebarData:', sidebarData);
+
+      // Ordenar los datos de la barra lateral por el orden de la pestaña
+      const sortedSidebarData = sidebarData.sort((a, b) => (a.tabOrder > b.tabOrder ? 1 : -1));
+
+      setSidebarData(sortedSidebarData);
+    } else {
+      // Si el usuario no está autenticado con Emp_cCodigo o no tiene un rol asignado, mostramos solo la opción "Inicio"
+      const homeItem = [
+        {
+          title: 'Inicio',
+          path: '/gerencial',
+          icon: null,
+          cName: '',
+          className: 'MenuOption',
+          iconClosed: '',
+          iconOpened: '',
+          role: '',
+          tabOrder: 1,
+          subNav: []
+        }
+      ];
+      setSidebarData(homeItem);
+    }
   }, []);
+
   const MyTreeItem = ({ label, icon: Icon, fontSize, ...props }) => {
     return (
       <TreeItem

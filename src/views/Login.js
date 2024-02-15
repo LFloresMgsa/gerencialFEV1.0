@@ -120,7 +120,7 @@ const Login = () => {
 			};
 			let _result;
 
-			console.log(_body);
+			//console.log(_body);
 			// si encontro el token ingresa el login
 			await eventoService.obtenerUsuario(_body).then(
 				(res) => {
