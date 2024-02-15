@@ -28,7 +28,21 @@ class SidebarDataClass {
                 iconOpened: <RiArrowUpSFill />,
                 role: 'Root, Administrator ',
                 tabOrder: 2,
-                subNav: []
+                subNav: [
+
+                    {
+                        title: 'Movimientos por Usuario',
+                        path: '/MovUsuario',
+                        icon: <IoIosPaper />,
+                        cName: 'sub-nav',
+                        className: '',
+                        iconClosed: <RiArrowDownSFill />,
+                        iconOpened: <RiArrowUpSFill />,
+                        role:' Administrator, User',
+                        tabOrder:3,
+                        subNav: []
+                      },
+                ]
             },
             {
                 title: 'Avances',
@@ -39,7 +53,7 @@ class SidebarDataClass {
                 iconClosed: <RiArrowDownSFill />,
                 iconOpened: <RiArrowUpSFill />,
                 role: 'Administrator',
-                tabOrder: 3,
+                tabOrder: 4,
                 subNav: []
             },
         ];
