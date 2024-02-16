@@ -47,7 +47,7 @@ const Rep_movimientos_usuarios = (props) => {
   useEffect(() => {
     listar();
     listarAnio();
-    listarEmpresa();
+    //listarEmpresa();
     //listarUsuarios();
   }, []);
 
@@ -87,30 +87,42 @@ const Rep_movimientos_usuarios = (props) => {
       if (res && Array.isArray(res)) { // Verifica si res es un array
         const empresaNom = res.map(item => item.emp_cNombreLargo); // Extrae solo los valores de Pan_cAnio
         setEmpresa(empresaNom); // Almacena los años en el estado
-        //console.log(empresaNom);
+        console.log(empresaNom);
+        return res; // Retorna los datos de la empresa
       } else {
-        console.error("Error: No se obtuvieron datos están en un formato incorrecto.");
+        console.error("Error: No se obtuvieron datos o los datos están en un formato incorrecto.");
+        return []; // Retorna un arreglo vacío en caso de error
       }
     } catch (error) {
       console.error("Error al obtener datos:", error);
+      return []; // Retorna un arreglo vacío en caso de error
     }
   };
 
 
 
-
   const listar = async (anioSeleccionado) => {
-    let _body = {
-      Accion: "MOV_USUARIO",
-      Emp_cCodigo: '',
-      Pan_cAnio: anioSeleccionado, // Usar el año seleccionado en el cuerpo de la solicitud
-      Per_cperiodo: '',
-      Lib_cTipoLibro: '',
-      
-    };
-
     try {
+      // Obtener las empresas asociadas al usuario actual
+      const empresasUsuario = await listarEmpresa();
+
+      console.log(empresasUsuario);
+      // Filtrar los datos por las empresas del usuario actual y el año seleccionado
+      const empresasUsuarioCodigos = empresasUsuario.map(emp => emp.emp_cCodigo);
+      const empresasUsuarioCodigosString = empresasUsuarioCodigos.join(',');
+      console.log(empresasUsuarioCodigosString);
+
+      const _body = {
+        Accion: "MOV_USUARIO",
+        Emp_cCodigo: empresasUsuarioCodigosString, // Usar los códigos de las empresas del usuario actual
+        Pan_cAnio: anioSeleccionado, // Usar el año seleccionado en el cuerpo de la solicitud
+        Per_cperiodo: '',
+        Lib_cTipoLibro: '',
+      };
+
       const res = await eventoService.obtenerMovimientoUsuario(_body);
+
+      console.log(res);
       if (res) {
         setData(res);
       } else {
@@ -199,7 +211,7 @@ const Rep_movimientos_usuarios = (props) => {
       console.log("Por favor seleccione la empresa y el año antes de realizar la búsqueda.");
     }
   };
-  
+
   return (
     <div style={{ ...fondoStyle, marginTop: '35px' }}>
       <Paper
@@ -230,6 +242,7 @@ const Rep_movimientos_usuarios = (props) => {
                   value={searchTermRestriccion}
                   onChange={(e) => {
                     setSearchTermRestriccion(e.target.value);
+                    //listar(e.target.value);
                   }}
                   variant="outlined"
                   size="small"
@@ -246,7 +259,7 @@ const Rep_movimientos_usuarios = (props) => {
                   value={searchTermTipo}
                   onChange={(e) => {
                     setSearchTermTipo(e.target.value);
-                    listar(e.target.value);
+                    //listar(e.target.value);
                   }}
                   variant="outlined"
                   size="small"
@@ -259,6 +272,17 @@ const Rep_movimientos_usuarios = (props) => {
               </Box>
             </Box>
           </Box>
+
+          <Button
+            variant="contained"
+            onClick={() => {
+              // Llamar a la función listar con el valor seleccionado del ComboBox
+              listar(searchTermTipo);
+            }}
+            style={{ marginLeft: '10px', backgroundColor: 'darkgreen', color: 'white', marginBottom: '10px' }}
+          >
+            Buscar
+          </Button>
 
 
           <Button
