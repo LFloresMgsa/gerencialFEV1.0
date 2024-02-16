@@ -38,6 +38,9 @@ const Rep_movimientos_usuarios = (props) => {
   const [itemsPerPage] = useState(50);
 
   const [anios, setAnios] = useState([]);
+
+  const [usuar, setUsuarios] = useState([]);
+
   // Estado para almacenar los años
   const [empresas, setEmpresa] = useState([]);
   // Cargar al inicio de la página
@@ -45,6 +48,7 @@ const Rep_movimientos_usuarios = (props) => {
     listar();
     listarAnio();
     listarEmpresa();
+    //listarUsuarios();
   }, []);
 
 
@@ -67,6 +71,8 @@ const Rep_movimientos_usuarios = (props) => {
     }
   };
 
+
+
   const _Usuario = cookies.get('Sgm_cUsuario');
 
   const listarEmpresa = async () => {
@@ -81,12 +87,12 @@ const Rep_movimientos_usuarios = (props) => {
       if (res && Array.isArray(res)) { // Verifica si res es un array
         const empresaNom = res.map(item => item.emp_cNombreLargo); // Extrae solo los valores de Pan_cAnio
         setEmpresa(empresaNom); // Almacena los años en el estado
-        console.log(empresaNom);
+        //console.log(empresaNom);
       } else {
-        console.error("Error: No se obtuvieron datos de años o los datos están en un formato incorrecto.");
+        console.error("Error: No se obtuvieron datos están en un formato incorrecto.");
       }
     } catch (error) {
-      console.error("Error al obtener datos de años:", error);
+      console.error("Error al obtener datos:", error);
     }
   };
 
@@ -99,7 +105,8 @@ const Rep_movimientos_usuarios = (props) => {
       Emp_cCodigo: '',
       Pan_cAnio: anioSeleccionado, // Usar el año seleccionado en el cuerpo de la solicitud
       Per_cperiodo: '',
-      Lib_cTipoLibro: ''
+      Lib_cTipoLibro: '',
+      
     };
 
     try {
