@@ -82,16 +82,12 @@ const Rep_movimientos_usuarios = (props) => {
   useEffect(() => {
     listar();
     listarAnio();
-    //listarEmpresa();
     listarUsuarios();
-    //listarLibros();
-    //listarPeriodos();
   }, []);
 
   useEffect(() => {
     if (searchTermAnio) {
       listarPeriodos();
-      //listarLibros();
     }
   }, [searchTermAnio]);
 
@@ -101,29 +97,6 @@ const Rep_movimientos_usuarios = (props) => {
       listarLibros();
     }
   }, [searchTermEmpresa, searchTermAnio]);
-
-
-
-  const listarAnio = async () => {
-    let _body = {
-      Accion: "MOV_ANIOS"
-    };
-
-    try {
-      const res = await eventoService.obtenerMovimientoUsuario(_body);
-      if (res && Array.isArray(res)) { // Verifica si res es un array
-        const anios = res.map(item => item.pan_cAnio); // Extrae solo los valores de Pan_cAnio
-        setAnios(anios); // Almacena los años en el estado
-        //console.log(anios);
-      } else {
-        console.error("Error: No se obtuvieron datos de años o los datos están en un formato incorrecto.");
-      }
-    } catch (error) {
-      console.error("Error al obtener datos de años:", error);
-      swal("La sessión se expiró", "", "error");
-      cerrar();
-    }
-  };
 
 
 
@@ -194,6 +167,27 @@ const Rep_movimientos_usuarios = (props) => {
     }
   };
 
+  const listarAnio = async () => {
+    let _body = {
+      Accion: "MOV_ANIOS"
+    };
+
+    try {
+      const res = await eventoService.obtenerMovimientoUsuario(_body);
+      if (res && Array.isArray(res)) { // Verifica si res es un array
+        const anios = res.map(item => item.pan_cAnio); // Extrae solo los valores de Pan_cAnio
+        setAnios(anios); // Almacena los años en el estado
+        //console.log(anios);
+      } else {
+        console.error("Error: No se obtuvieron datos de años o los datos están en un formato incorrecto.");
+      }
+    } catch (error) {
+      console.error("Error al obtener datos de años:", error);
+      swal("La sessión se expiró", "", "error");
+      window.location.href = './logout';
+      //cerrar();
+    }
+  };
 
   const listarPeriodos = async () => {
     let _body = {
@@ -223,7 +217,7 @@ const Rep_movimientos_usuarios = (props) => {
 
   const listarUsuarios = async () => {
     let _body = {
-      Accion: "MOV_USUARIOS",
+      Accion: "MOV_NOMBRES",
       soft_cCodSoft: '001'
     };
 
@@ -244,61 +238,51 @@ const Rep_movimientos_usuarios = (props) => {
     }
   };
 
+  const [listadoCargado, setListadoCargado] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const cerrar = async () => {
-    cookies.remove('Sgm_cUsuario', { path: "/" });
-    cookies.remove('Sgm_cRole', { path: "/" });
-    cookies.remove('Sgm_cNombre', { path: "/" });
-    cookies.remove('usu_cClave', { path: "/" });
-    //cookies.remove('Sgm_cObservaciones', { path: "/" });
-    cookies.remove('token', { path: "/" });
-    cookies.remove('IsLoged', { path: "/" });
-    cookies.remove('IsLogedIni', { path: "/" });
+ 
 
-    storage.DelStorage('Emp_cCodigo', "")
-    storage.DelStorage('Pan_cAnio', "")
-    // Oculta la alerta después de cierto tiempo (opcional)
-    setTimeout(() => {
-      setShowAlert(false);
-      swal("La sessión se expiró", "", "error");
-      window.location.href = './logout'; // Redirige después de cerrar sesión
-    }, 1000); // 1000 milisegundos (1 segundo) - ajusta según sea necesario
-  }
+  useEffect(() => {
+    document.body.style.cursor = loading ? 'wait' : 'auto'; // Cambiar el cursor a 'wait' si loading es true, de lo contrario, restaurar el cursor predeterminado
+  }, [loading]);
 
+  useEffect(() => {
+    if (listadoCargado) {
+      swal("¡Listado cargado completamente!");
+    }
+  }, [listadoCargado]);
+  const handleBuscarClick = async () => {
+    setLoading(true); // Establecer loading en true antes de llamar a la función listar
+    await listar(); // Esperar a que la función listar termine de ejecutarse
+    setLoading(false); // Establecer loading en false después de que listar haya finalizado
+    setListadoCargado(true);
+  };
 
-  const listar = async (anioSeleccionado) => {
+  const listar = async () => {
     try {
-      // Obtener las empresas asociadas al usuario actual
+      setListadoCargado(false);
       const mostrarEmpresa = await listarEmpresa();
-      //console.log(mostrarEmpresa);
-
-
-      // Filtrar los datos por las empresas del usuario actual y el año seleccionado
       const codigoEmpresaConLlaves = mostrarEmpresa.map(emp => emp.emp_cCodigo);
-      //console.log(codigoEmpresaConLlaves);
       const empresaSeleccionadaString = codigoEmpresaConLlaves.join(',');
-      //console.log(empresaSeleccionadaString);
-
       const _body = {
         Accion: "MOV_USUARIO",
-        Emp_cCodigo: empresaSeleccionadaString, // Usar los códigos de las empresas del usuario actual
-        Pan_cAnio: anioSeleccionado, // Usar el año seleccionado en el cuerpo de la solicitud
+        Emp_cCodigo: empresaSeleccionadaString,
+        Pan_cAnio: searchTermAnio !== '' ? searchTermAnio : undefined,
         Per_cperiodo: '',
         Lib_cTipoLibro: '',
       };
-
+  
       const res = await eventoService.obtenerMovimientoUsuario(_body);
-
-      //console.log(res);
+      console.log(res);
       if (res) {
         setData(res);
+        
       } else {
         console.error("Error: No se obtuvieron datos o los datos están en un formato incorrecto.");
       }
     } catch (error) {
       console.error("Error al obtener datos:", error);
-
-      //cerrar();   
     }
   };
 
@@ -311,7 +295,8 @@ const Rep_movimientos_usuarios = (props) => {
 
   const filteredData = (data || []).filter((item) => {
     const nombreLargoMatch = item?.emp_cNombreLargo?.toLowerCase().includes(searchTermEmpresa.toLowerCase());
-    const anioMatch = item?.pan_cAnio === searchTermAnio; // Verifica si el año coincide
+    //const anioMatch = item?.pan_cAnio === searchTermAnio; // Verifica si el año coincide
+    const anioMatch = !searchTermAnio || item?.pan_cAnio === searchTermAnio;
     const libroDes = item?.lib_cDescripcion?.toLowerCase().includes(searchTermLibro.toLowerCase());
     const periodoDes = item?.per_cDescripPeriodo?.toLowerCase().includes(searchTermPeriodo.toLowerCase());
 
@@ -377,7 +362,7 @@ const Rep_movimientos_usuarios = (props) => {
   );
 
   const limpiarcampos = () => {
-    setsearchTermEmpresa('');
+    //setsearchTermEmpresa('');
     setsearchTermAnio('');
     setsearchTermPeriodo('');
     setsearchTermLibro('');
@@ -447,6 +432,7 @@ const Rep_movimientos_usuarios = (props) => {
                   size="small"
                   fullWidth
                 >
+                  <MenuItem value="">TODOS</MenuItem>
                   {anios.map((anio) => (
                     <MenuItem key={anio} value={anio}>{anio}</MenuItem>
                   ))}
@@ -535,22 +521,41 @@ const Rep_movimientos_usuarios = (props) => {
             </Box>
           </Box>
 
-          <Button
-            variant="contained"
-            onClick={() => {
-              listar(searchTermAnio);
-            }}
-            sx={{
-              backgroundColor: 'darkred',
-              color: 'white',
-              mb: 2, // Margen inferior
-              '&:hover': {
-                backgroundColor: 'gray', // Color de fondo al pasar el mouse
-              }
-            }}
-          >
-            <SearchIcon sx={{ marginRight: '5px' }} /> Buscar
-          </Button>
+          <div style={{ position: 'relative' }}>
+      {/* Pantalla de carga */}
+      {loading && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semitransparente gris
+            zIndex: 9999, // Asegura que esté encima de otros elementos
+          }}
+        >
+        </div>
+      )}
+
+      {/* Resto de tu contenido */}
+    </div>
+
+       {/* Botón de búsqueda */}
+       <Button
+        variant="contained"
+        onClick={handleBuscarClick}
+        sx={{
+          backgroundColor: 'darkred',
+          color: 'white',
+          mb: 2, // Margen inferior
+          '&:hover': {
+            backgroundColor: 'gray', // Color de fondo al pasar el mouse
+          }
+        }}
+      >
+        <SearchIcon sx={{ marginRight: '5px' }} /> Buscar
+      </Button>
 
 
           <Button
