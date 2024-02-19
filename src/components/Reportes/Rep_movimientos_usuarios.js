@@ -25,6 +25,20 @@ import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 
 const cookies = new Cookies();
 
+const XLSX = require('xlsx');
+
+const exportToXLSX = (currentData) => {
+  // Crear una nueva instancia de workbook
+  const wb = XLSX.utils.book_new();
+
+  // Crear una hoja de trabajo y agregar los datos de la tabla
+  const ws = XLSX.utils.json_to_sheet(currentData);
+  XLSX.utils.book_append_sheet(wb, ws, 'Datos');
+
+  // Guardar el archivo XLSX
+  XLSX.writeFile(wb, 'datos.xlsx');
+};
+
 const Rep_movimientos_usuarios = (props) => {
 
   const fondoStyle = {
@@ -241,7 +255,7 @@ const Rep_movimientos_usuarios = (props) => {
   const [listadoCargado, setListadoCargado] = useState(false);
   const [loading, setLoading] = useState(false);
 
- 
+
 
   useEffect(() => {
     document.body.style.cursor = loading ? 'wait' : 'auto'; // Cambiar el cursor a 'wait' si loading es true, de lo contrario, restaurar el cursor predeterminado
@@ -272,12 +286,12 @@ const Rep_movimientos_usuarios = (props) => {
         Per_cperiodo: '',
         Lib_cTipoLibro: '',
       };
-  
+
       const res = await eventoService.obtenerMovimientoUsuario(_body);
       console.log(res);
       if (res) {
         setData(res);
-        
+
       } else {
         console.error("Error: No se obtuvieron datos o los datos están en un formato incorrecto.");
       }
@@ -522,40 +536,40 @@ const Rep_movimientos_usuarios = (props) => {
           </Box>
 
           <div style={{ position: 'relative' }}>
-      {/* Pantalla de carga */}
-      {loading && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semitransparente gris
-            zIndex: 9999, // Asegura que esté encima de otros elementos
-          }}
-        >
-        </div>
-      )}
+            {/* Pantalla de carga */}
+            {loading && (
+              <div
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semitransparente gris
+                  zIndex: 9999, // Asegura que esté encima de otros elementos
+                }}
+              >
+              </div>
+            )}
 
-      {/* Resto de tu contenido */}
-    </div>
+            {/* Resto de tu contenido */}
+          </div>
 
-       {/* Botón de búsqueda */}
-       <Button
-        variant="contained"
-        onClick={handleBuscarClick}
-        sx={{
-          backgroundColor: 'darkred',
-          color: 'white',
-          mb: 2, // Margen inferior
-          '&:hover': {
-            backgroundColor: 'gray', // Color de fondo al pasar el mouse
-          }
-        }}
-      >
-        <SearchIcon sx={{ marginRight: '5px' }} /> Buscar
-      </Button>
+          {/* Botón de búsqueda */}
+          <Button
+            variant="contained"
+            onClick={handleBuscarClick}
+            sx={{
+              backgroundColor: 'darkred',
+              color: 'white',
+              mb: 2, // Margen inferior
+              '&:hover': {
+                backgroundColor: 'gray', // Color de fondo al pasar el mouse
+              }
+            }}
+          >
+            <SearchIcon sx={{ marginRight: '5px' }} /> Buscar
+          </Button>
 
 
           <Button
@@ -574,10 +588,9 @@ const Rep_movimientos_usuarios = (props) => {
             <ChecklistOutlinedIcon sx={{ marginRight: '5px' }} /> Limpiar Todos los Campos
           </Button>
 
-
           <Button
             variant="contained"
-            onClick={""}
+            onClick={() => exportToXLSX(currentData)} // Llamar a la función exportToXLSX y pasar currentData como argumento
             sx={{
               backgroundColor: 'darkgreen',
               color: 'white',
