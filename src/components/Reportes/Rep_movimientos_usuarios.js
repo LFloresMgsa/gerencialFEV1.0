@@ -6,18 +6,23 @@ import { storage } from "../../storage.js";
 import {
   Paper, Table, TableBody, TableCell, TableContainer, TableHead,
   TableRow, Box, Typography, Divider, TextField, InputAdornment,
-  Button, Select, MenuItem
+  Button, Select, MenuItem, IconButton
 } from '@mui/material';
+import { SaveAlt as SaveAltIcon } from '@mui/icons-material';
 import AppFooter from '../../components/layout/AppFooter.js';
-import SearchIcon from '@mui/icons-material/Search';
-import { styled, css } from '@mui/system';
 
+import { styled, css } from '@mui/system';
+import { Search as SearchIcon } from '@mui/icons-material';
 import fondo from '../../imagenes/fondotodos.png'
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import swal from 'sweetalert';
 import Cookies from 'universal-cookie';
 import { set } from 'lodash';
+import { WindowSharp } from '@mui/icons-material';
+
+import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
+
 const cookies = new Cookies();
 
 const Rep_movimientos_usuarios = (props) => {
@@ -115,6 +120,8 @@ const Rep_movimientos_usuarios = (props) => {
       }
     } catch (error) {
       console.error("Error al obtener datos de años:", error);
+      swal("La sessión se expiró", "", "error");
+      cerrar();
     }
   };
 
@@ -161,6 +168,7 @@ const Rep_movimientos_usuarios = (props) => {
       }
     } catch (error) {
       console.error("Error al obtener datos:", error);
+      //cerrar();   
       return []; // Retorna un arreglo vacío en caso de error
     }
   };
@@ -237,6 +245,26 @@ const Rep_movimientos_usuarios = (props) => {
   };
 
 
+  const cerrar = async () => {
+    cookies.remove('Sgm_cUsuario', { path: "/" });
+    cookies.remove('Sgm_cRole', { path: "/" });
+    cookies.remove('Sgm_cNombre', { path: "/" });
+    cookies.remove('usu_cClave', { path: "/" });
+    //cookies.remove('Sgm_cObservaciones', { path: "/" });
+    cookies.remove('token', { path: "/" });
+    cookies.remove('IsLoged', { path: "/" });
+    cookies.remove('IsLogedIni', { path: "/" });
+
+    storage.DelStorage('Emp_cCodigo', "")
+    storage.DelStorage('Pan_cAnio', "")
+    // Oculta la alerta después de cierto tiempo (opcional)
+    setTimeout(() => {
+      setShowAlert(false);
+      swal("La sessión se expiró", "", "error");
+      window.location.href = './logout'; // Redirige después de cerrar sesión
+    }, 1000); // 1000 milisegundos (1 segundo) - ajusta según sea necesario
+  }
+
 
   const listar = async (anioSeleccionado) => {
     try {
@@ -269,6 +297,8 @@ const Rep_movimientos_usuarios = (props) => {
       }
     } catch (error) {
       console.error("Error al obtener datos:", error);
+
+      //cerrar();   
     }
   };
 
@@ -282,9 +312,9 @@ const Rep_movimientos_usuarios = (props) => {
   const filteredData = (data || []).filter((item) => {
     const nombreLargoMatch = item?.emp_cNombreLargo?.toLowerCase().includes(searchTermEmpresa.toLowerCase());
     const anioMatch = item?.pan_cAnio === searchTermAnio; // Verifica si el año coincide
-    const libroDes  = item?.lib_cDescripcion?.toLowerCase().includes(searchTermLibro.toLowerCase());
-    const periodoDes  = item?.per_cDescripPeriodo?.toLowerCase().includes(searchTermPeriodo.toLowerCase());
-   
+    const libroDes = item?.lib_cDescripcion?.toLowerCase().includes(searchTermLibro.toLowerCase());
+    const periodoDes = item?.per_cDescripPeriodo?.toLowerCase().includes(searchTermPeriodo.toLowerCase());
+
     const usuariosDes = item?.ase_cUserCrea?.toLowerCase().includes(searchTermUsuario.toLowerCase());
     // //const usuariosDes = searchTermUsuario !== '' ? (item && item.ase_cUserCrea && item.ase_cUserCrea.toLowerCase().includes(searchTermUsuario.toLowerCase())) : true;
 
@@ -356,6 +386,14 @@ const Rep_movimientos_usuarios = (props) => {
     setPeriodos([]); // Reiniciar el estado de periodos
   };
 
+  const limpiarEmpresa = () => {
+    setsearchTermEmpresa('');
+  };
+
+  const formatNumberWithCommas = (number) => {
+
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
 
   return (
     <div style={{ ...fondoStyle, marginTop: '35px' }}>
@@ -372,12 +410,32 @@ const Rep_movimientos_usuarios = (props) => {
                 onChange={(e) => handleEmpresaChange(e, empresaLibros)}
                 variant="outlined"
                 size="small"
-                sx={{ width: '100%' }}
+                sx={{ width: '80%' }}
               >
+
+
                 {empresas.map((empresaNom) => (
                   <MenuItem key={empresaNom} value={empresaNom}>{empresaNom}</MenuItem>
                 ))}
               </Select>
+              <Box sx={{ marginLeft: '30px' }}> {/* Espacio entre el ComboBox y el botón */}
+                <Button
+                  variant="contained"
+                  onClick={limpiarEmpresa}
+                  sx={{
+                    backgroundColor: 'darkred',
+                    color: 'white',
+                    mb: 0, // Margen inferior
+                    minWidth: 'auto', // Eliminar el ancho mínimo del botón
+                    padding: '2px 5px', // Ajustar el padding horizontal y vertical
+                    '&:hover': {
+                      backgroundColor: 'gray', // Color de fondo al pasar el mouse
+                    }
+                  }}
+                >
+                  <ChecklistOutlinedIcon sx={{ marginRight: '5px' }} /> Limpiar Empresa
+                </Button>
+              </Box>
             </Box>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
               <Box sx={{ minWidth: 150 }}>
@@ -394,34 +452,70 @@ const Rep_movimientos_usuarios = (props) => {
                   ))}
                 </Select>
               </Box>
+
               <Box sx={{ minWidth: 200 }}>
                 <Typography sx={{ fontWeight: 'bold' }}>Libro:</Typography>
                 <Select
                   value={searchTermLibro}
-                  onChange={(e) => setsearchTermLibro(e.target.value)}
+                  onClick={() => {
+                    // Verificar si se ha seleccionado una empresa y un año
+                    if (!searchTermAnio || !searchTermEmpresa) {
+                      // Si no se han seleccionado una empresa y un año, mostrar un mensaje de error
+                      swal("Por favor, Seleccione la Empresa y el Año.");
+                    }
+                  }}
+                  onChange={(e) => {
+                    // Verificar si se ha seleccionado una empresa y un año
+                    if (!searchTermAnio || !searchTermEmpresa) {
+                      // Si no se han seleccionado una empresa y un año, retornar sin hacer nada
+                      return;
+                    }
+                    // Si se han seleccionado una empresa y un año, establecer el término de búsqueda del libro
+                    setsearchTermLibro(e.target.value);
+                  }}
                   variant="outlined"
                   size="small"
                   fullWidth
                 >
+                  <MenuItem value="">TODOS</MenuItem>
                   {libros.map((libro) => (
                     <MenuItem key={libro} value={libro}>{libro}</MenuItem>
                   ))}
                 </Select>
               </Box>
+
               <Box sx={{ minWidth: 150 }}>
                 <Typography sx={{ fontWeight: 'bold' }}>Periodos:</Typography>
                 <Select
                   value={searchTermPeriodo}
-                  onChange={(e) => setsearchTermPeriodo(e.target.value)}
+                  onClick={() => {
+                    // Verificar si se ha seleccionado un año
+                    if (!searchTermAnio) {
+                      // Si no se ha seleccionado un año, mostrar un mensaje de error o realizar alguna acción
+                      swal("Por favor, Seleccione el Año.");
+                    }
+                  }}
+                  onChange={(e) => {
+                    // Verificar si se ha seleccionado un año
+                    if (!searchTermAnio) {
+                      // Si no se ha seleccionado un año, mostrar un mensaje de error o realizar alguna acción
+                      //console.error("Por favor, seleccione un año primero.");
+                      return;
+                    }
+                    // Si se ha seleccionado un año, establecer el término de búsqueda del período
+                    setsearchTermPeriodo(e.target.value);
+                  }}
                   variant="outlined"
                   size="small"
                   fullWidth
                 >
+                  <MenuItem value="">TODOS</MenuItem>
                   {periodos.map((periodo) => (
                     <MenuItem key={periodo} value={periodo}>{periodo}</MenuItem>
                   ))}
                 </Select>
               </Box>
+
               <Box sx={{ minWidth: 200 }}>
                 <Typography sx={{ fontWeight: 'bold' }}>Usuarios:</Typography>
                 <Select
@@ -431,9 +525,10 @@ const Rep_movimientos_usuarios = (props) => {
                   size="small"
                   fullWidth
                 >
+
+                  <MenuItem value="">TODOS LOS USUARIOS</MenuItem> {/* Opción en blanco */}
                   {usuar.map((usuario) => (
                     <MenuItem key={usuario} value={usuario}>{usuario}</MenuItem>
-                    
                   ))}
                 </Select>
               </Box>
@@ -444,25 +539,51 @@ const Rep_movimientos_usuarios = (props) => {
             variant="contained"
             onClick={() => {
               listar(searchTermAnio);
-              // Verificar si se ha seleccionado un año antes de llamar a la función listar
-              // if (!searchTermTipo) {
-              //   swal("Seleccione el año", "", "error");
-              //   return; // Detener la ejecución si no se ha seleccionado un año
-              // }
-              // // Llamar a la función listar con el valor seleccionado del ComboBox
-
             }}
-            sx={{ backgroundColor: 'darkgreen', color: 'white', mb: 2 }}
+            sx={{
+              backgroundColor: 'darkred',
+              color: 'white',
+              mb: 2, // Margen inferior
+              '&:hover': {
+                backgroundColor: 'gray', // Color de fondo al pasar el mouse
+              }
+            }}
           >
-            Buscar
+            <SearchIcon sx={{ marginRight: '5px' }} /> Buscar
           </Button>
+
 
           <Button
             variant="contained"
             onClick={limpiarcampos}
-            sx={{ backgroundColor: 'darkred', color: 'white', ml: 'auto', mb: 2 }}
+            sx={{
+              backgroundColor: 'darkred',
+              color: 'white',
+              mb: 2, // Margen inferior
+              marginLeft: '10px',
+              '&:hover': {
+                backgroundColor: 'gray', // Color de fondo al pasar el mouse
+              }
+            }}
           >
-            Limpiar Campos
+            <ChecklistOutlinedIcon sx={{ marginRight: '5px' }} /> Limpiar Todos los Campos
+          </Button>
+
+
+          <Button
+            variant="contained"
+            onClick={""}
+            sx={{
+              backgroundColor: 'darkgreen',
+              color: 'white',
+              mb: 2, // Margen inferior
+              marginLeft: '10px',
+              '&:hover': {
+                backgroundColor: 'gray', // Color de fondo al pasar el mouse
+              }
+            }}
+          >
+            <SaveAltIcon sx={{ marginRight: '5px' }} /> Exportar Xlsx
           </Button>
 
           <TableContainer component={Paper}>
@@ -478,7 +599,7 @@ const Rep_movimientos_usuarios = (props) => {
                   <TableCell align="left" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Usuario</TableCell>
                   <TableCell align="center" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Tipo de Libro</TableCell>
                   <TableCell align="left" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Descripcion</TableCell>
-                  <TableCell align="center" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Registros</TableCell>
+                  <TableCell align="center" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Cantidad de Registros</TableCell>
                   <TableCell align="left" sx={{ backgroundColor: 'darkred', color: 'white', fontWeight: 'bold' }}>Fecha de Creación</TableCell>
                 </TableRow>
               </TableHead>
@@ -494,7 +615,7 @@ const Rep_movimientos_usuarios = (props) => {
                     <TableCell align="left">{item.ase_cUserCrea}</TableCell>
                     <TableCell align="center">{item.lib_cTipoLibro}</TableCell>
                     <TableCell align="left">{item.lib_cDescripcion}</TableCell>
-                    <TableCell align="center">{item.registros}</TableCell>
+                    <TableCell align="center">{formatNumberWithCommas(item.registros)}</TableCell>
                     <TableCell align="left">{item.creacion}</TableCell>
                   </TableRow>
                 ))}
