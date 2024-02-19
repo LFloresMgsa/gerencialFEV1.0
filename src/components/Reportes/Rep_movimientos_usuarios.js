@@ -36,7 +36,7 @@ const exportToXLSX = (currentData) => {
   XLSX.utils.book_append_sheet(wb, ws, 'Datos');
 
   // Guardar el archivo XLSX
-  XLSX.writeFile(wb, 'datos.xlsx');
+  XLSX.writeFile(wb, 'gerencial.xlsx');
 };
 
 const Rep_movimientos_usuarios = (props) => {
