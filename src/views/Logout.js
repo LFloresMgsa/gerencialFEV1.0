@@ -27,11 +27,11 @@ const Logout = () => {
 
 
     cookies.remove('Sgm_cUsuario', { path: "/" });
-    cookies.remove('Sgm_cRole', { path: "/" });
+    cookies.remove('_r', { path: "/" }); //Roles
     cookies.remove('Sgm_cNombre', { path: "/" });
     cookies.remove('usu_cClave', { path: "/" });
     //cookies.remove('Sgm_cObservaciones', { path: "/" });
-    cookies.remove('token', { path: "/" });
+    cookies.remove('_t:0', { path: "/" }); //Token
     cookies.remove('IsLoged', { path: "/" });
     cookies.remove('IsLogedIni', { path: "/" });
 

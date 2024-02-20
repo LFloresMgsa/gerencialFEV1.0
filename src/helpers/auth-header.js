@@ -7,7 +7,7 @@ export function authHeader(isMultiPart, newToken) {
 
 
   try {
-    const Token = cookies.get('token');
+    const Token = cookies.get('_t:0');
 
     // console.log('----------------------');
     // console.log(Token);

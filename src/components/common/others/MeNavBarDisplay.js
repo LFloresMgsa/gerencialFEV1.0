@@ -100,7 +100,7 @@ const MeNavBarDisplay = (props) => {
       setAnchorEl(null);
     }
   };
-  const [showLoginForm, setShowLoginForm] = useState(!isLoged); 
+  const [showLoginForm, setShowLoginForm] = useState(!isLoged);
   const handleLogin = () => {
     setIsLoged(true);
     setUsername(currentUser.detail.username);
@@ -151,15 +151,21 @@ const MeNavBarDisplay = (props) => {
     </Button>,
   ];
 
-  // Load de Pagina
   useEffect(() => {
-    
-    const _IsLoged= cookies.get("IsLoged");
-    setIsLoged(_IsLoged);
+    const loged = cookies.get('IsLoged');
+    let isLoged = false; // Valor predeterminado en caso de que haya un error al decodificar
 
-//console.log('_IsLoged : ', _IsLoged);
+    try {
+      const logedDesencriptado = atob(loged);
+      isLoged = logedDesencriptado === 'true';
+    } catch (error) {
+      //console.error('Error al decodificar el valor de la cookie:', error);
+    }
 
-  }, [])
+    setIsLoged(isLoged);
+
+    //console.log(isLoged);
+  }, []);
 
   const nombre = cookies.get('Sgm_cUsuario');
   //console.log('nombre : ', nombre);
@@ -173,7 +179,7 @@ const MeNavBarDisplay = (props) => {
           onClick={handleMenu}
           startIcon={<AccountCircleOutlinedIcon />}
         >
-          
+
           {isLoged ? `Bienvenido: ${nombre} ` : "INGRESAR"}
         </Button>
       </Box>
@@ -181,7 +187,7 @@ const MeNavBarDisplay = (props) => {
         anchorEl={anchorEl}
         open={openMenu}
         onClose={handleClose}
-        style={{ marginTop: '10px' , marginLeft:'auto'}}
+        style={{ marginTop: '10px', marginLeft: 'auto' }}
         variant="menu"
       >
         {!isLoged && showLoginForm && <Login />}

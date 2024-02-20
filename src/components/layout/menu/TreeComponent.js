@@ -19,8 +19,19 @@ const TreeComponent = ({ history }) => {
     const initialExpandedNodes = JSON.parse(localStorage.getItem('expandedNod')) || [];
     setExpandedNodes(initialExpandedNodes);
 
+    const rolDesencriptado = cookies.get('_r');
+    let userRole;
+    //console.log(rolDesencriptado);
+    try {
+      userRole = atob(rolDesencriptado);
+      //console.log(userRole);
+    } catch (error) {
+      //console.error('Error al decodificar el valor de la cookie:', error);
+      // Manejar el error adecuadamente, como establecer un valor predeterminado
+    }
+
     // Obtener el rol del usuario desde las cookies
-    const userRole = cookies.get('Sgm_cRole');
+    // const userRole = cookies.get('Sgm_cRole');
     //console.log('UserRole:', userRole);
 
     // // Obtener el código de la empresa del usuario desde las cookies

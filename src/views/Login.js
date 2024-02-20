@@ -72,7 +72,7 @@ const Login = () => {
 
 
 
-	const Emp_cCodigo = storage.GetStorage('Emp_cCodigo');
+	//const Emp_cCodigo = storage.GetStorage('Emp_cCodigo');
 	const soft_cCodSoft = storage.GetStorage('soft_cCodSoft');
 
 
@@ -83,7 +83,7 @@ const Login = () => {
 			// obtenemos el token
 			const token = await eventoService.obtenerToken(_body);
 			if (token) {
-				cookies.set('token', token, { path: "/" });
+				cookies.set('_t:0', token, { path: "/" });
 				setToken(token);
 				setError('');
 			}
@@ -98,7 +98,7 @@ const Login = () => {
 		try {
 			// Genera un token
 			await BuscarToken();
-			const token = cookies.get("token");
+			const token = cookies.get("_t:0");
 			//console.log(token);
 			// Valida si encontró el token
 			if (!token) {
@@ -125,13 +125,20 @@ const Login = () => {
 				}
 			);
 
+			const rolEncriptado = btoa(_result.role);
+			const logedEncriptado = btoa('true');
+
 
 
 			if (_result.usuario === username && _result.respuesta === "1") {
+
 				cookies.set('Sgm_cUsuario', _result.usuario, { path: "/" });
+
 				cookies.set('Sgm_cNombre', _result.nombre, { path: "/" });
-				cookies.set('Sgm_cRole', _result.role, { path: "/" });
-				cookies.set('IsLoged', true, { path: "/" });
+				cookies.set('_r', rolEncriptado, { path: "/" });
+				// cookies.set('Sgm_cRole', _result.role, { path: "/" });
+				cookies.set('IsLoged', logedEncriptado, { path: "/" });
+
 				//cookies.set('IsLogedIni', true, { path: "/" });
 				setError('');
 
