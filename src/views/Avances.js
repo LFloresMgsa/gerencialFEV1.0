@@ -1,7 +1,9 @@
 import React from 'react';
 
 const Avances = () => {
-  return <div>Página principal - AVANCES</div>;
+  return <div>
+    <h3>EN DESARROLLO...........</h3>
+    </div>;
 };
 
 export default Avances;

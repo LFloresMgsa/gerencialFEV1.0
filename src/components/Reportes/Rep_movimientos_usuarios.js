@@ -463,7 +463,7 @@ const Rep_movimientos_usuarios = (props) => {
                     }
                   }}
                 >
-                  <ChecklistOutlinedIcon sx={{ marginRight: '5px' }} /> Limpiar Empresa
+                  <ChecklistOutlinedIcon sx={{ marginRight: '5px' }} /> Limpiar el Campo Empresa
                 </Button>
               </Box>
             </Box>
