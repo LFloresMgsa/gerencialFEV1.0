@@ -72,8 +72,8 @@ const Login = () => {
 
 
 
-	//const Emp_cCodigo = storage.GetStorage('Emp_cCodigo');
-	const soft_cCodSoft = storage.GetStorage("_sc",sessionStorage);
+	const Emp_cCodigo = storage.GetStorage('Emp_cCodigo');
+	const soft_cCodSoft = storage.GetStorage('soft_cCodSoft');
 
 
 	const BuscarToken = async () => {
@@ -128,13 +128,10 @@ const Login = () => {
 
 
 			if (_result.usuario === username && _result.respuesta === "1") {
-
-				storage.SetCookie('Sgm_cUsuario', _result.usuario);
-				
+				cookies.set('Sgm_cUsuario', _result.usuario, { path: "/" });
+				cookies.set('Sgm_cNombre', _result.nombre, { path: "/" });
 				cookies.set('Sgm_cRole', _result.role, { path: "/" });
 				cookies.set('IsLoged', true, { path: "/" });
-
-				//cookies.set('Sgm_cNombre', _result.nombre, { path: "/" });
 				//cookies.set('IsLogedIni', true, { path: "/" });
 				setError('');
 
