@@ -18,7 +18,7 @@ export const storage = {
 let variablesEncriptadas = {}; // Objeto para almacenar las variables encriptadas
 
 function IniciaVariablesGlobales() {
-  SetStorage('soft_cCodSoft','011');
+  SetStorage('_sc','011');
   return true;
 }
 
