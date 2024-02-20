@@ -125,7 +125,7 @@ const Rep_movimientos_usuarios = (props) => {
 
   // Cargar al inicio de la página
   useEffect(() => {
-    listar();
+    //listar();
     listarAnio();
     listarUsuarios();
   }, []);
@@ -426,8 +426,9 @@ const Rep_movimientos_usuarios = (props) => {
   };
 
   return (
-    <div style={{ ...fondoStyle, marginTop: '35px' }}>
-      <Paper sx={{ p: 2, margin: 1, maxWidth: '100%', flexGrow: 1, backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1A2027' : '#fff' }}>
+    <div style={{ position: 'relative', zIndex: 1 }}>
+
+      <div style={{ ...fondoStyle, marginTop: '35px', position: 'absolute', top: 0, left: 6, right: 15, bottom: 0, zIndex: 0 }}>
         <Box>
           <Typography variant="h5" color="black" align="center" fontWeight="bold" gutterBottom>
             MOVIMIENTOS POR USUARIOS
@@ -691,16 +692,19 @@ const Rep_movimientos_usuarios = (props) => {
             </Button>
           </Box>
         </Box>
-      </Paper>
-      <Box sx={{ mt: 2 }}>
-        <Divider />
-        <Box sx={{ p: 2, textAlign: 'center' }}>
-          <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '10px' }}>
-            Copyright© 2024 - Management Group S.A.
-          </Typography>
+        <Box sx={{ mt: 2 }}>
+          <Divider />
+          <Box sx={{ p: 2, textAlign: 'center' }}>
+            <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '10px' }}>
+              Copyright© 2024 - Management Group S.A.
+            </Typography>
+          </Box>
         </Box>
-      </Box>
-      <Divider />
+        <Divider />
+      </div>
+
+
+
     </div>
   );
 }
