@@ -27,11 +27,16 @@ const cookies = new Cookies();
 
 const XLSX = require('xlsx');
 
-const exportToXLSX = (allData) => {
-  // Definir los nuevos encabezados
+const exportToXLSX = (allData, filteredData = null) => {
+  let dataToExport = allData; // Por defecto, exportar todos los datos
+
+  // Verificar si se proporcionaron datos filtrados y si existen
+  if (filteredData && filteredData.length > 0) {
+    dataToExport = filteredData;
+  }
 
   // Mapear todos los datos para que coincidan con los nuevos encabezados
-  const newData = allData.map(item => ({
+  const newData = dataToExport.map(item => ({
     'Código': item.emp_cCodigo,
     'Empresa': item.emp_cNombreLargo,
     'RUC': item.emp_cNumRuc,
@@ -616,7 +621,7 @@ const Rep_movimientos_usuarios = (props) => {
 
           <Button
             variant="contained"
-            onClick={() => exportToXLSX(data)} // Aquí pasamos todos los datos
+            onClick={() => exportToXLSX(data, filteredData)} // Pasar los datos filtrados
             sx={{
               backgroundColor: 'darkgreen',
               color: 'white',
