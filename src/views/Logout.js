@@ -33,10 +33,10 @@ const Logout = () => {
     //cookies.remove('Sgm_cObservaciones', { path: "/" });
     cookies.remove('token', { path: "/" });
     cookies.remove('IsLoged', { path: "/" });
-    cookies.remove('IsLogedIni', { path: "/" });
+    // cookies.remove('IsLogedIni', { path: "/" });
 
-    storage.DelStorage('Emp_cCodigo',"")
-    storage.DelStorage('Pan_cAnio',"")
+    // storage.DelStorage('Emp_cCodigo',"")
+    // storage.DelStorage('Pan_cAnio',"")
     // Oculta la alerta después de cierto tiempo (opcional)
     setTimeout(() => {
       setShowAlert(false);
