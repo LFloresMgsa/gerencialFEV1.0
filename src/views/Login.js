@@ -73,7 +73,7 @@ const Login = () => {
 
 
 	//const Emp_cCodigo = storage.GetStorage('Emp_cCodigo');
-	const soft_cCodSoft = storage.GetStorage('_sc');
+	const soft_cCodSoft = storage.GetStorage("_sc",sessionStorage);
 
 
 	const BuscarToken = async () => {

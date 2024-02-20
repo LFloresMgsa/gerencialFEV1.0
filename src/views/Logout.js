@@ -28,7 +28,7 @@ const Logout = () => {
 
 
     storage.DelCookie('Sgm_cUsuario', "");
-
+    //storage.DelStorage("_sc",localStorage);
     cookies.remove('Sgm_cRole', { path: "/" });
     
     cookies.remove('usu_cClave', { path: "/" });
