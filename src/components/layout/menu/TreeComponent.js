@@ -3,6 +3,7 @@ import { TreeView } from '@mui/x-tree-view/TreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 import Typography from '@mui/material/Typography';
 import FolderOpen from '@mui/icons-material/FolderOpenOutlined';
+import Description from '@mui/icons-material/DescriptionOutlined';
 import SidebarDataClass from './SidebarDataClass.js';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -30,13 +31,6 @@ const TreeComponent = ({ history }) => {
       // Manejar el error adecuadamente, como establecer un valor predeterminado
     }
 
-    // Obtener el rol del usuario desde las cookies
-    // const userRole = cookies.get('Sgm_cRole');
-    //console.log('UserRole:', userRole);
-
-    // // Obtener el código de la empresa del usuario desde las cookies
-    // const userEmpCode = storage.GetStorage('Emp_cCodigo');
-    // // console.log('EmpCode:', userEmpCode);
 
     // Verificar si el usuario está autenticado con Emp_cCodigo y tiene un rol asignado
     if (userRole) {
@@ -90,7 +84,7 @@ const TreeComponent = ({ history }) => {
       key={nodes.title}
       nodeId={nodes.title}
       label={nodes.title.toLowerCase()}
-      icon={nodes.subNav && expandedNodes.includes(nodes.title) ? FolderOpen : FolderOpen}
+      icon={nodes.subNav && nodes.subNav.length > 0 ? FolderOpen : FolderOpen}
       fontSize="14px"
       onClick={() => {
         if (!nodes.subNav || nodes.subNav.length === 0) {
@@ -99,10 +93,26 @@ const TreeComponent = ({ history }) => {
       }}
     >
       {Array.isArray(nodes.subNav)
-        ? nodes.subNav.map((node) => renderTree(node))
-        : <MyTreeItem key={nodes.title} label={nodes.title} icon={FolderOpen} fontSize="14px" />}
+        ? nodes.subNav.map((node) => (
+            <MyTreeItem
+              key={node.title}
+              nodeId={node.title}
+              label={node.title.toLowerCase()}
+              icon={node.subNav && node.subNav.length > 0 ? FolderOpen : Description}
+              fontSize="14px"
+              onClick={() => {
+                if (!node.subNav || node.subNav.length === 0) {
+                  handleNodeClick(node.path);
+                }
+              }}
+            >
+              {Array.isArray(node.subNav) ? node.subNav.map((childNode) => renderTree(childNode)) : null}
+            </MyTreeItem>
+          ))
+        : null}
     </MyTreeItem>
   );
+  
 
   const handleNodeClick = (path) => {
     history.push(path);
