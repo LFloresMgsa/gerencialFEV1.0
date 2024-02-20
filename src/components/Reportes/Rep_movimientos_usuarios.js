@@ -27,17 +27,43 @@ const cookies = new Cookies();
 
 const XLSX = require('xlsx');
 
-const exportToXLSX = (currentData) => {
+const exportToXLSX = (allData) => {
+  // Definir los nuevos encabezados
+
+  // Mapear todos los datos para que coincidan con los nuevos encabezados
+  const newData = allData.map(item => ({
+    'Código': item.emp_cCodigo,
+    'Empresa': item.emp_cNombreLargo,
+    'RUC': item.emp_cNumRuc,
+    'Año': item.pan_cAnio,
+    'Período': item.per_cPeriodo,
+    'Descripción del Período': item.per_cDescripPeriodo,
+    'Usuario': item.ase_cUserCrea,
+    'Tipo de Libro': item.lib_cTipoLibro,
+    'Descripción del Libro': item.lib_cDescripcion,
+    'Cantidad de Registros': item.registros,
+    'Fecha de Creación': item.creacion,
+    '': item.usu_cCodUsuario,
+    '': item.accion,
+    '': item.usuario,
+    '': item.soft_cCodSoft
+  }));
+
   // Crear una nueva instancia de workbook
   const wb = XLSX.utils.book_new();
 
-  // Crear una hoja de trabajo y agregar los datos de la tabla
-  const ws = XLSX.utils.json_to_sheet(currentData);
+  // Crear una hoja de trabajo y agregar los datos mapeados con los nuevos encabezados
+  const ws = XLSX.utils.json_to_sheet(newData);
+
+  // Agregar la hoja de trabajo al libro
   XLSX.utils.book_append_sheet(wb, ws, 'Datos');
 
   // Guardar el archivo XLSX
   XLSX.writeFile(wb, 'gerencial.xlsx');
 };
+
+
+
 
 const Rep_movimientos_usuarios = (props) => {
 
@@ -590,7 +616,7 @@ const Rep_movimientos_usuarios = (props) => {
 
           <Button
             variant="contained"
-            onClick={() => exportToXLSX(currentData)} // Llamar a la función exportToXLSX y pasar currentData como argumento
+            onClick={() => exportToXLSX(data)} // Aquí pasamos todos los datos
             sx={{
               backgroundColor: 'darkgreen',
               color: 'white',
