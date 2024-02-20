@@ -4,6 +4,7 @@ import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import styled from 'styled-components';
 import { storage } from "../storage.js";
+
 import Cookies from 'universal-cookie';
 const cookies = new Cookies();
 
@@ -26,13 +27,16 @@ const Logout = () => {
   const cerrarSesion = () => {
 
 
-    cookies.remove('Sgm_cUsuario', { path: "/" });
+    storage.DelCookie('Sgm_cUsuario', "");
+
     cookies.remove('Sgm_cRole', { path: "/" });
-    cookies.remove('Sgm_cNombre', { path: "/" });
+    
     cookies.remove('usu_cClave', { path: "/" });
-    //cookies.remove('Sgm_cObservaciones', { path: "/" });
+   
     cookies.remove('token', { path: "/" });
     cookies.remove('IsLoged', { path: "/" });
+     //cookies.remove('Sgm_cObservaciones', { path: "/" });
+    //cookies.remove('Sgm_cNombre', { path: "/" });
     // cookies.remove('IsLogedIni', { path: "/" });
 
     // storage.DelStorage('Emp_cCodigo',"")

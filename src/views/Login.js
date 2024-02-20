@@ -128,10 +128,13 @@ const Login = () => {
 
 
 			if (_result.usuario === username && _result.respuesta === "1") {
-				cookies.set('Sgm_cUsuario', _result.usuario, { path: "/" });
-				cookies.set('Sgm_cNombre', _result.nombre, { path: "/" });
+
+				storage.SetCookie('Sgm_cUsuario', _result.usuario);
+				
 				cookies.set('Sgm_cRole', _result.role, { path: "/" });
 				cookies.set('IsLoged', true, { path: "/" });
+
+				//cookies.set('Sgm_cNombre', _result.nombre, { path: "/" });
 				//cookies.set('IsLogedIni', true, { path: "/" });
 				setError('');
 

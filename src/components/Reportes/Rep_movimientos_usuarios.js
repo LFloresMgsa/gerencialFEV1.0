@@ -105,7 +105,7 @@ const Rep_movimientos_usuarios = (props) => {
   const [permitirBusqueda, setPermitirBusqueda] = useState(false);
   const [selectedEmpresaCodigo, setSelectedEmpresaCodigo] = useState('');
 
-  const _Usuario = cookies.get('Sgm_cUsuario');
+  const _Usuario = storage.GetCookie('Sgm_cUsuario');
 
   const [empresaLibros, setEmpresaLibros] = useState([]);
 

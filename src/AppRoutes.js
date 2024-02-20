@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 
 import Dashboard from './views/Dashboard';
-
+import { storage } from "./storage.js";
 
 import Avances from './views/Avances';
 
@@ -16,7 +16,7 @@ const cookies = new Cookies();
 const AppRoutes = (props) => {
 
   const { accessToken, currentUser } = props;
-  const _Usuario = cookies.get("Sgm_cUsuario");
+  const _Usuario = storage.GetCookie("Sgm_cUsuario");
   const [validaLogeo, setValidaLogeo] = useState(_Usuario || '')
   //console.log(_Usuario);
   return (

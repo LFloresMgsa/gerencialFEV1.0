@@ -161,9 +161,8 @@ const MeNavBarDisplay = (props) => {
 
   }, [])
 
-  const nombre = cookies.get('Sgm_cUsuario');
-  //console.log('nombre : ', nombre);
-  //const nombre2 = storage.SetStorage("Sgm_cUsuario", _result[0].Sgm_cUsuario);
+  const nombre = storage.GetCookie('Sgm_cUsuario');
+
 
   return (
     <React.Fragment>
