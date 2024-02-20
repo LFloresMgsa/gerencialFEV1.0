@@ -428,7 +428,7 @@ const Rep_movimientos_usuarios = (props) => {
   return (
     <div style={{ position: 'relative', zIndex: 1 }}>
 
-      <div style={{ ...fondoStyle, marginTop: '35px', position: 'absolute', top: 0, left: 6, right: 15, bottom: 0, zIndex: 0 }}>
+      <div style={{ ...fondoStyle, marginTop: '35px', position: 'absolute', top: 0, left: 10, right: 15, bottom: 0, zIndex: 0 }}>
         <Box>
           <Typography variant="h5" color="black" align="center" fontWeight="bold" gutterBottom>
             MOVIMIENTOS POR USUARIOS
