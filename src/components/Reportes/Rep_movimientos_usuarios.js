@@ -275,11 +275,13 @@ const Rep_movimientos_usuarios = (props) => {
     document.body.style.cursor = loading ? 'wait' : 'auto'; // Cambiar el cursor a 'wait' si loading es true, de lo contrario, restaurar el cursor predeterminado
   }, [loading]);
 
-  useEffect(() => {
-    if (listadoCargado) {
-      swal("¡Listado cargado completamente!");
-    }
-  }, [listadoCargado]);
+  // useEffect(() => {
+  //   if (listadoCargado) {
+  //     swal("¡Listado cargado completamente!");
+  //   } else {
+  //     swal("No tiene datos");
+  //   }
+  // }, [listadoCargado]);
 
   const handleBuscarClick = async () => {
     // Verificar si se ha seleccionado una empresa o un año
@@ -299,7 +301,7 @@ const Rep_movimientos_usuarios = (props) => {
     setLoading(false);
 
     // Establecer listadoCargado en true para indicar que el listado se ha cargado
-    setListadoCargado(true);
+    swal("¡Listado cargado completamente!");
   };
 
 
@@ -310,12 +312,12 @@ const Rep_movimientos_usuarios = (props) => {
     // Obtener el código de la empresa correspondiente al valor seleccionado
     const nombEmpresa = empresaLibros.find(emp => emp.emp_cNombreLargo === selectedEmpresa);
 
-    console.log(selectedEmpresa);
+    //console.log(selectedEmpresa);
 
     if (nombEmpresa) {
       const codigoEmpresa = nombEmpresa.emp_cCodigo;
 
-      console.log(codigoEmpresa);
+      //console.log(codigoEmpresa);
       setSelectedEmpresaCodigo(codigoEmpresa);
       setsearchTermEmpresa(selectedEmpresa); // Actualizar el término de búsqueda de empresa
     }
