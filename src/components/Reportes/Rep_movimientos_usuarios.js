@@ -20,7 +20,7 @@ import swal from 'sweetalert';
 import Cookies from 'universal-cookie';
 import { set } from 'lodash';
 import { WindowSharp } from '@mui/icons-material';
-
+import DeleteSweepOutlinedIcon from '@mui/icons-material/DeleteSweepOutlined';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 
 const cookies = new Cookies();
@@ -138,7 +138,7 @@ const Rep_movimientos_usuarios = (props) => {
 
 
   useEffect(() => {
-    if (searchTermEmpresa && searchTermAnio) {
+    if (searchTermEmpresa || searchTermAnio) {
       listarLibros();
     }
   }, [searchTermEmpresa, searchTermAnio]);
@@ -146,23 +146,6 @@ const Rep_movimientos_usuarios = (props) => {
 
 
 
-  const handleEmpresaChange = async (event, empresaLibros) => {
-    // Obtener el valor seleccionado del ComboBox
-    const selectedEmpresa = event.target.value;
-
-    // Obtener el código de la empresa correspondiente al valor seleccionado
-    const nombEmpresa = empresaLibros.find(emp => emp.emp_cNombreLargo === selectedEmpresa);
-
-    console.log(selectedEmpresa);
-
-    if (nombEmpresa) {
-      const codigoEmpresa = nombEmpresa.emp_cCodigo;
-
-      console.log(codigoEmpresa);
-      setSelectedEmpresaCodigo(codigoEmpresa);
-      setsearchTermEmpresa(selectedEmpresa); // Actualizar el término de búsqueda de empresa
-    }
-  };
 
 
 
@@ -297,29 +280,79 @@ const Rep_movimientos_usuarios = (props) => {
       swal("¡Listado cargado completamente!");
     }
   }, [listadoCargado]);
+
   const handleBuscarClick = async () => {
-    setLoading(true); // Establecer loading en true antes de llamar a la función listar
-    await listar(); // Esperar a que la función listar termine de ejecutarse
-    setLoading(false); // Establecer loading en false después de que listar haya finalizado
+    // Verificar si se ha seleccionado una empresa o un año
+    if (!searchTermAnio && !searchTermEmpresa) {
+      // Si no se ha seleccionado ni una empresa ni un año, mostrar un mensaje de error y retornar
+      swal("Por favor, Seleccione una Empresa o un Año.");
+      return;
+    }
+
+    // Establecer loading en true antes de llamar a la función listar
+    setLoading(true);
+
+    // Llamar a la función listar
+    await listar();
+
+    // Establecer loading en false después de que listar haya finalizado
+    setLoading(false);
+
+    // Establecer listadoCargado en true para indicar que el listado se ha cargado
     setListadoCargado(true);
   };
+
+
+  const handleEmpresaChange = async (event, empresaLibros) => {
+    // Obtener el valor seleccionado del ComboBox
+    const selectedEmpresa = event.target.value;
+
+    // Obtener el código de la empresa correspondiente al valor seleccionado
+    const nombEmpresa = empresaLibros.find(emp => emp.emp_cNombreLargo === selectedEmpresa);
+
+    console.log(selectedEmpresa);
+
+    if (nombEmpresa) {
+      const codigoEmpresa = nombEmpresa.emp_cCodigo;
+
+      console.log(codigoEmpresa);
+      setSelectedEmpresaCodigo(codigoEmpresa);
+      setsearchTermEmpresa(selectedEmpresa); // Actualizar el término de búsqueda de empresa
+    }
+  };
+
 
   const listar = async () => {
     try {
       setListadoCargado(false);
-      const mostrarEmpresa = await listarEmpresa();
-      const codigoEmpresaConLlaves = mostrarEmpresa.map(emp => emp.emp_cCodigo);
-      const empresaSeleccionadaString = codigoEmpresaConLlaves.join(',');
+
+      let empresaSeleccionada;
+      // Si no hay empresa seleccionada, listar todas las empresas
+      if (!selectedEmpresaCodigo) {
+        const mostrarEmpresa = await listarEmpresa();
+        const codigoEmpresaConLlaves = mostrarEmpresa.map(emp => emp.emp_cCodigo);
+        const empresaSeleccionadaString = codigoEmpresaConLlaves.join(',');
+        //console.log(empresaSeleccionadaString);
+        // Asignar todas las empresas a la variable empresaSeleccionada
+        empresaSeleccionada = empresaSeleccionadaString;
+      } else {
+        empresaSeleccionada = selectedEmpresaCodigo;
+        //console.log(selectedEmpresaCodigo);
+      }
+
+      //console.log(empresaSeleccionada);
+
+
       const _body = {
         Accion: "MOV_USUARIO",
-        Emp_cCodigo: empresaSeleccionadaString,
+        Emp_cCodigo: empresaSeleccionada,
         Pan_cAnio: searchTermAnio !== '' ? searchTermAnio : undefined,
         Per_cperiodo: '',
         Lib_cTipoLibro: '',
       };
 
       const res = await eventoService.obtenerMovimientoUsuario(_body);
-      console.log(res);
+      //console.log(res);
       if (res) {
         setData(res);
 
@@ -410,15 +443,23 @@ const Rep_movimientos_usuarios = (props) => {
     //setsearchTermEmpresa('');
     //setsearchTermAnio('');
     setsearchTermPeriodo('');
-    setsearchTermLibro('');
+    //setsearchTermLibro('');
     setsearchTermUsuario('');
-    setLibros([]); // Reiniciar el estado de libros
-    setPeriodos([]); // Reiniciar el estado de periodos
+    //setLibros([]); // Reiniciar el estado de libros
+    //setPeriodos([]); // Reiniciar el estado de periodos
   };
 
   const limpiarEmpresa = () => {
-    setsearchTermEmpresa('');
-  };
+    if (typeof searchTermEmpresa === 'string') {
+      setsearchTermEmpresa('');
+      setSelectedEmpresaCodigo('');
+      setLibros([]); // Limpiar el código de la empresa seleccionada
+    } else {
+      setsearchTermEmpresa([]);
+      setLibros([]);
+      setSelectedEmpresaCodigo(''); // Limpiar el código de la empresa seleccionada
+    }
+  }
 
   const formatNumberWithCommas = (number) => {
 
@@ -449,7 +490,7 @@ const Rep_movimientos_usuarios = (props) => {
                   <MenuItem key={empresaNom} value={empresaNom}>{empresaNom}</MenuItem>
                 ))}
               </Select>
-              <Box sx={{ marginLeft: '30px' }}> {/* Espacio entre el ComboBox y el botón */}
+              <Box sx={{ marginLeft: '25px' }}> {/* Espacio entre el ComboBox y el botón */}
                 <Button
                   variant="contained"
                   onClick={limpiarEmpresa}
@@ -457,14 +498,15 @@ const Rep_movimientos_usuarios = (props) => {
                     backgroundColor: 'darkred',
                     color: 'white',
                     mb: 0, // Margen inferior
-                    minWidth: 'auto', // Eliminar el ancho mínimo del botón
-                    padding: '2px 5px', // Ajustar el padding horizontal y vertical
+                    display: 'flex', // Utilizar flexbox
+                    alignItems: 'center', // Alinear verticalmente el contenido al centro
+                    padding: '7px 10px', // Ajustar el padding horizontal y vertical
                     '&:hover': {
                       backgroundColor: 'gray', // Color de fondo al pasar el mouse
                     }
                   }}
                 >
-                  <ChecklistOutlinedIcon sx={{ marginRight: '5px' }} /> Limpiar el Campo Empresa
+                  <DeleteSweepOutlinedIcon sx={{ fontSize: 'small', marginRight: '5px' }} />
                 </Button>
               </Box>
             </Box>
@@ -588,6 +630,7 @@ const Rep_movimientos_usuarios = (props) => {
           </div>
 
           {/* Botón de búsqueda */}
+
           <Button
             variant="contained"
             onClick={handleBuscarClick}
@@ -617,7 +660,7 @@ const Rep_movimientos_usuarios = (props) => {
               }
             }}
           >
-            <ChecklistOutlinedIcon sx={{ marginRight: '5px' }} /> Limpiar los Campos
+            <ChecklistOutlinedIcon sx={{ marginRight: '5px' }} /> Limpiar Campos
           </Button>
 
           <Button

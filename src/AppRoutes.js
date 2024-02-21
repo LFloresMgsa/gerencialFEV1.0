@@ -39,7 +39,6 @@ const AppRoutes = (props) => {
       {validaLogeo !== null && validaLogeo.trim() !== '' ? (
         <>
 
-
           <Route path='/avances' render={(route) => <Avances {...route} />} />
 
           <Route path='/MovUsuario' render={(route) => <MovUsuarios {...route} />} />
