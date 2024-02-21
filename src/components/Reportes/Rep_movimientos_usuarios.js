@@ -48,6 +48,10 @@ const exportToXLSX = (allData, filteredData = null) => {
     'Descripción del Libro': item.lib_cDescripcion,
     'Cantidad de Registros': item.registros,
     'Fecha de Creación': item.creacion,
+    '': item.usu_cCodUsuario,
+    '': item.accion,
+    '': item.usuario,
+    '': item.soft_cCodSoft
   }));
 
   // Crear una nueva instancia de workbook
