@@ -48,10 +48,6 @@ const exportToXLSX = (allData, filteredData = null) => {
     'Descripción del Libro': item.lib_cDescripcion,
     'Cantidad de Registros': item.registros,
     'Fecha de Creación': item.creacion,
-    '': item.usu_cCodUsuario,
-    '': item.accion,
-    '': item.usuario,
-    '': item.soft_cCodSoft
   }));
 
   // Crear una nueva instancia de workbook
@@ -67,14 +63,14 @@ const exportToXLSX = (allData, filteredData = null) => {
   const year = currentDate.getFullYear();
   const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Sumar 1 porque los meses van de 0 a 11
   const day = String(currentDate.getDate()).padStart(2, '0');
-
+  
   const formattedDate = `${year}${month}${day}`; // Formato AAAAMMDD
   const formattedTime = currentDate.toTimeString().split(' ')[0].replace(/:/g, ''); // Formato hhmm
-
+  
   const usuario = cookies.get("Sgm_cUsuario");
   // Concatenar la fecha y la hora sin guiones bajos
   const fileName = `ger_movimientos_por_usuario_${usuario}_${formattedDate}_${formattedTime}.xlsx`;
-
+  
   // Guardar el archivo XLSX con la fecha y hora actual en el nombre
   XLSX.writeFile(wb, fileName);
 };
